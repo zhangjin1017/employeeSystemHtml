@@ -1,0 +1,306 @@
+.bt1 {
+    height: 40px;
+    padding: 0 2em;
+    color: blue;
+    border: none;
+    outline: none;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all ease 800ms;
+    width: 120px;
+    position: relative;
+}
+
+.bt1:hover {
+    background-color: white;
+    color: red;
+}
+
+.bt1:before,
+.bt1:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 2px;
+    background-color: red;
+    transition: all ease 400ms;
+}
+
+.bt1:after {
+    top: inherit;
+    right: inherit;
+    left: 0;
+    bottom: 0;
+}
+
+.bt1:hover:after,
+.bt1:hover:before {
+    width: 100%;
+    transition: all ease 800ms;
+}
+
+.bt2 {
+    height: 50px;
+    padding: 0 2em;
+    background-color: white;
+    color: black;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all ease 800ms;
+    width: 320px;
+    position: relative;
+}
+
+.bt2:hover {
+    background-color: white;
+    color: red;
+}
+
+.bt2:before,
+.bt2:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 2px;
+    background-color: red;
+    transition: all ease 400ms;
+}
+
+.bt2:after {
+    top: inherit;
+    right: inherit;
+    left: 0;
+    bottom: 0;
+}
+
+.bt2:hover:after,
+.bt2:hover:before {
+    width: 100%;
+    transition: all ease 800ms;
+}
+
+.bt3 {
+    height: 50px;
+    padding: 0 2em;
+    background-color: rgba(14, 140, 204, 1);
+    color: white;
+    border: none;
+    outline: none;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all ease 800ms;
+    width: 318px;
+    position: relative;
+}
+
+.bt3:hover {
+    background-color: white;
+    color: red;
+}
+
+.bt3:before,
+.bt3:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 2px;
+    background-color: red;
+    transition: all ease 400ms;
+}
+
+.bt3:after {
+    top: inherit;
+    right: inherit;
+    left: 0;
+    bottom: 0;
+}
+
+.bt3:hover:after,
+.bt3:hover:before {
+    width: 100%;
+    transition: all ease 800ms;
+}
+
+.bt4 {
+    height: 20px;
+    padding: 0 2em;
+    background-color: white;
+    color: black;
+    border: none;
+    outline: none;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all ease 800ms;
+    width: 60px;
+    position: relative;
+}
+
+.bt4:hover {
+    background-color: rgba(207, 220, 230, 1);
+    color: red;
+}
+
+.bt4:before,
+.bt4:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 2px;
+    background-color: red;
+    transition: all ease 400ms;
+}
+
+.bt4:after {
+    top: inherit;
+    right: inherit;
+    left: 0;
+    bottom: 0;
+}
+
+.bt4:hover:after,
+.bt4:hover:before {
+    width: 100%;
+    transition: all ease 800ms;
+}
+
+.bt5 {
+    height: 30px;
+    padding: 0 2em;
+    background-color: white;
+    color: black;
+    border: none;
+    outline: none;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all ease 800ms;
+    width: 50px;
+    position: relative;
+}
+
+.bt5:hover {
+    background-color: rgba(207, 220, 230, 1);
+    color: red;
+}
+
+.bt5:before,
+.bt5:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 2px;
+    background-color: red;
+    transition: all ease 400ms;
+}
+
+.bt5:after {
+    top: inherit;
+    right: inherit;
+    left: 0;
+    bottom: 0;
+}
+
+.bt5:hover:after,
+.bt5:hover:before {
+    width: 100%;
+    transition: all ease 800ms;
+}
+
+.bt6 {
+    height: 35px;
+    padding: 0 2em;
+    background-color: gray;
+    color: black;
+    border: none;
+    outline: none;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all ease 800ms;
+    width: 120px;
+    position: relative;
+}
+
+.bt6:hover {
+    background-color: #3598FE;
+    color: red;
+}
+
+.bt6:before,
+.bt6:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 2px;
+    background-color: red;
+    transition: all ease 400ms;
+}
+
+.bt6:after {
+    top: inherit;
+    right: inherit;
+    left: 0;
+    bottom: 0;
+}
+
+.bt6:hover:after,
+.bt6:hover:before {
+    width: 100%;
+    transition: all ease 800ms;
+}
+
+.bt8 {
+    height: 35px;
+    padding: 0 2em;
+    background-color: none;
+    color: green;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all ease 800ms;
+    width: 100px;
+    position: relative;
+}
+
+.bt8:hover {
+    background-color: white;
+    color: red;
+}
+
+.bt8:before,
+.bt8:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 2px;
+    background-color: red;
+    transition: all ease 400ms;
+}
+
+.bt8:after {
+    top: inherit;
+    right: inherit;
+    left: 0;
+    bottom: 0;
+}
+
+.bt8:hover:after,
+.bt8:hover:before {
+    width: 100%;
+    transition: all ease 800ms;
+}

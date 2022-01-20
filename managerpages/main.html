@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>第一个 ECharts 实例</title>
+    <!-- 引入 echarts.js -->
+    <script src="..//js/echarts.min.js"></script>
+    <!--字体图标-->
+    <link href="../javaex/pc/css/icomoon.css" rel="stylesheet" />
+    <!--动画-->
+    <link href="../javaex/pc/css/animate.css" rel="stylesheet" />
+    <!--骨架样式-->
+    <link href="../javaex/pc/css/common.css" rel="stylesheet" />
+    <!--皮肤（缇娜）-->
+    <link href="../javaex/pc/css/skin/tina.css" rel="stylesheet" />
+    <!--jquery，不可修改版本-->
+    <script src="../javaex/pc/lib/jquery-1.7.2.min.js"></script>
+    <!--全局动态修改-->
+    <script src="../javaex/pc/js/common.js"></script>
+    <!--核心组件-->
+    <script src="../javaex/pc/js/javaex.min.js"></script>
+    <!--表单验证-->
+    <script src="../javaex/pc/js/javaex-formVerify.js"></script>
+
+
+</head>
+
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main" style="width: 500px;height:330px;"></div>
+    <div id="box" style="width: 500px;height:330px;margin-top: -330px;margin-left: 620px;"></div>
+
+    <div id="myChartBin" style="width: 500px;height:330px;"></div>
+    <div id="box1" style="width: 500px;height:330px;margin-top: -330px;margin-left: 620px;"></div>
+
+
+
+    <script type="text/javascript ">
+        window.onload = function() {
+
+            //柱状图
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                url: "http://127.0.0.1:8080/employeeSystem/depart/getECharInfor2",
+                success: function(data) {
+
+                    // 基于准备好的dom，初始化echarts实例
+                    var myChart = echarts.init(document.getElementById('main'));
+                    var myChartBin = echarts.init(document.getElementById('myChartBin'));
+
+
+                    // 指定图表的配置项和数据
+                    var option = {
+                        title: {
+                            text: '员工信息柱状图'
+                        },
+                        tooltip: {},
+                        legend: {
+                            data: ['员工人数']
+                        },
+                        xAxis: {
+                            data: data.empStateList
+                        },
+                        yAxis: {},
+                        series: [{
+                            name: '人数',
+                            type: 'bar',
+                            data: data.empNumList
+                        }]
+                    };
+
+                    // 使用刚指定的配置项和数据显示图表。
+                    myChart.setOption(option);
+
+
+                    //折线图
+                    //初始化ehcharts实例
+                    var myChart = echarts.init(document.getElementById("box"));
+                    //指定图表的配置项和数据
+                    var option = {
+                        //标题
+                        title: {
+                            text: '员工信息折线图'
+                        },
+                        //工具箱
+                        //保存图片
+                        toolbox: {
+                            show: true,
+                            feature: {
+                                saveAsImage: {
+                                    show: true
+                                }
+                            }
+                        },
+                        //图例-每一条数据的名字叫销量
+                        legend: {
+                            data: ['员工人数']
+                        },
+                        //x轴
+                        xAxis: {
+                            data: data.empStateList
+                        },
+                        //y轴没有显式设置，根据值自动生成y轴
+                        yAxis: {},
+                        //数据-data是最终要显示的数据
+                        series: [{
+                            name: '员工人数',
+                            type: 'line',
+                            data: data.empNumList
+                        }]
+                    };
+                    myChart.setOption(option);
+
+
+                    //饼状图
+                    myChartBin.setOption({
+                        title: {
+                            text: '部门信息饼状图'
+                        },
+                        series: [{
+                            name: 'Echarts-饼状图',
+                            type: 'pie',
+                            //直径占整个div高度的多少
+                            radius: '55%',
+                            data: (function() {
+                                var arr = [];
+                                $.ajax({
+                                    type: "post",
+                                    async: false, //同步执行
+                                    url: "http://127.0.0.1:8080/employeeSystem/depart/getECharInfor", //获取图标数据
+                                    data: {},
+                                    dataType: "json", //返回数据形式为json
+                                    success: function(result) {
+                                        console.log(result);
+
+                                        if (result) {
+                                            for (var i = 0; i < result.nameList.length; i++) {
+                                                //alert(result.listCont[i]+" "+result.listName[i]);
+                                                arr.push({
+                                                    name: result.nameList[i],
+                                                    value: result.numList[i]
+                                                });
+                                            }
+                                        }
+                                    },
+                                    error: function(errorMsg) {
+                                        alert("不好意思,图表请求数据失败啦!");
+                                        myChartBin.hideLoading();
+                                    }
+                                })
+                                return arr;
+                            })()
+                        }],
+                    })
+
+
+
+
+
+
+                    //饼状图1
+                    var myChart = echarts.init(document.getElementById("box1"));
+
+                    option1 = {
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: '{a} <br/>{b}: {c} ({d}%)'
+                        },
+                        legend: {
+                            orient: 'vertical',
+                            left: 10,
+                            data: data.nameList
+                        },
+                        series: [{
+                            name: '访问来源',
+                            type: 'pie',
+                            radius: ['50%', '70%'],
+                            avoidLabelOverlap: false,
+                            label: {
+                                show: false,
+                                position: 'center'
+                            },
+                            emphasis: {
+                                label: {
+                                    show: true,
+                                    fontSize: '30',
+                                    fontWeight: 'bold'
+                                }
+                            },
+                            labelLine: {
+                                show: false
+                            },
+                            data: (function() {
+                                var arr = [];
+                                $.ajax({
+                                    type: "post",
+                                    async: false, //同步执行
+                                    url: "http://127.0.0.1:8080/employeeSystem/depart/getECharInfor", //获取图标数据
+                                    data: {},
+                                    dataType: "json", //返回数据形式为json
+                                    success: function(result) {
+                                        console.log(result);
+
+                                        if (result) {
+                                            for (var i = 0; i < result.nameList.length; i++) {
+                                                //alert(result.listCont[i]+" "+result.listName[i]);
+                                                arr.push({
+                                                    name: result.nameList[i],
+                                                    value: result.numList[i]
+                                                });
+                                            }
+                                        }
+                                    },
+                                    error: function(errorMsg) {
+                                        alert("不好意思,图表请求数据失败啦!");
+                                        myChartBin.hideLoading();
+                                    }
+                                })
+                                return arr;
+                            })()
+                        }]
+                    };
+
+                    //使用刚刚指定的配置项和数据项显示图表
+                    myChart.setOption(option1);
+
+                },
+            });
+        }
+    </script>
+</body>
+
+
+
+<html>

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Login And Register</title>
+
+    <link rel="stylesheet" href="css/login.css">
+    <!--字体图标-->
+    <link href="javaex1/pc/css/icomoon.css" rel="stylesheet" />
+    <!--动画-->
+    <link href="javaex1/pc/css/animate.css" rel="stylesheet" />
+    <!--骨架样式-->
+    <link href="javaex1/pc/css/common.css" rel="stylesheet" />
+    <!--皮肤-->
+    <link href="javaex1/pc/css/skin/default.css" rel="stylesheet" />
+    <!--jquery，不可修改版本-->
+    <script src="javaex1/pc/lib/jquery-1.7.2.min.js"></script>
+    <!--核心组件-->
+    <script src="javaex1/pc/js/javaex.min.js"></script>
+    <!--表单验证-->
+    <script src="javaex1/pc/js/javaex-formVerify.js"></script>
+</head>
+
+<body style="background: url(image/back.jpg);">
+
+    <div class="main">
+        <div class="container a-container" id="a-container">
+            <div class="form" id="a-form" method="" action="">
+                <h2 class="form_title title">用户注册</h2>
+                <div class="form__icons"><img class="form__icon" src="./image/1.svg" alt=""><img class="form__icon"
+                        src="./image/2.svg"></div><span class="form__span">or use email for registration</span>
+                <div id="h1">
+                    <input id="workId" name="workId" class="form__input1" type="text" placeholder="工号自动生成">
+                </div>
+                <input id="registername" name="registername" class="form__input1" type="text" placeholder="姓名">
+                <input id="repassword" name="repassword" class="form__input1" type="password" placeholder="密码">
+
+
+                <div id="d1">
+
+
+                    <select id="select" name="departId" class="form__input1">
+                        <option value="-1">--请选择部门--</option>
+                    </select>
+
+                </div>
+
+                <button class="form__button button submit" onclick="register();">注册</button>
+            </div>
+        </div>
+
+
+
+        <div class="container b-container" id="b-container">
+            <div class="form" id="b-form">
+                <h2 class="form_title title">用户登录</h2>
+                <div class="form__icons">
+                    <img class="form__icon" src="./image/3.svg">
+                </div><span class="form__span">Please enter login information</span>
+                <input id="workid" name="workid" class="form__input" type="text" placeholder="工号">
+                <input id="password" name="password" class="form__input" type="password" placeholder="密码">
+
+
+                <select name="lv" id="lv" class="form__input">
+                    <option value="-1">请选择权限</option>
+                    <option value="员工">员工</option>
+                    <option value="管理员">管理员</option>
+                </select><br>
+
+                <button style="border: 0px;" onclick="javaex.alert({
+                    content: '请联系管理员，重置密码！'
+                });">忘记密码？</button>
+
+                <button class="form__button button" onclick="loginByUsername();">登录</button>
+            </div>
+        </div>
+        <div class="switch" id="switch-cnt">
+            <div class="switch__circle"></div>
+            <div class="switch__circle switch__circle--t"></div>
+            <div class="switch__container" id="switch-c1">
+                <h2 class="switch__title title">Welcome Back !</h2>
+                <p class="switch__description description">To keep connected with us please login with your personal
+                    info</p>
+                <button class="switch__button button switch-btn">登录</button>
+            </div>
+            <div class="switch__container is-hidden" id="switch-c2">
+                <h2 class="switch__title title">Hello Friend !</h2>
+                <p class="switch__description description">Enter your personal details and start journey with us</p>
+                <button class="switch__button button switch-btn">注册</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="text/javascript">
+        //登录
+        function loginByUsername() {
+            var workid = $("#workid").val();
+            console.log(workid);
+            var password = $("#password").val();
+            console.log(password);
+            var lv = $("#lv").val();
+            console.log(lv);
+            if (lv == "-1" || workid == null || password == null) {
+                javaex.alert({
+                    content: "信息不能为空，请完善信息！",
+
+                })
+
+                return;
+            }
+
+            javaex.tip({
+                content: "数据提交中，请稍候...",
+                type: "submit"
+            });
+            $.ajax({
+                type: "post",
+                //后端需要调用的地址
+                url: "http://127.0.0.1:8080/employeeSystem/login/loginById",
+                dataType: "json",
+                data: {
+                    "workid": workid,
+                    "password": password,
+                    "lv": lv,
+                },
+                // contentType: "json/application",
+                //设置超时
+                timeout: 10000,
+                async: true,
+                success: function (response) {
+                    javaex.tip({
+                        content: "提交成功",
+                        type: "success"
+                    });
+                    console.log(response);
+                    if (response.message == "success") {
+                        if (lv == "员工") {
+                            sessionStorage.setItem("employee", response.employee);
+                            sessionStorage.setItem("stateId", response.stateId);
+                            var employee = JSON.parse(response.employee);
+                            if (employee.position == "员工" || employee.position == "实习") {
+                                javaex.alert({
+                                    content: "登录成功",
+                                    confirm: function () {
+                                        toempIndex()
+                                    }
+                                });
+                            } else {
+                                javaex.alert({
+                                    content: "登录成功",
+                                    confirm: function () {
+                                        todirectorIndex()
+                                    }
+                                });
+                            }
+                        }
+                        if (lv == "管理员") {
+                            sessionStorage.setItem("manager", response.manager);
+                            javaex.alert({
+                                content: "登录成功",
+                                confirm: function () {
+                                    tomanagerIndex();
+                                }
+                            })
+
+                        }
+                    } else if (response.message == "账号状态异常，非本公司员工") {
+                        javaex.alert({
+                            content: "账号状态异常，非本公司员工！",
+                        });
+                    } else if (response.message == "账户状态异常，请联系管理员") {
+                        if (lv == "员工") {
+                            sessionStorage.setItem("employee", response.employee);
+                            sessionStorage.setItem("stateId", response.stateId);
+                            var employee = JSON.parse(response.employee);
+                            if (employee.position == "员工" || employee.position == "实习") {
+                                javaex.alert({
+                                    content: "账户状态异常，请联系管理员",
+                                    confirm: function () {
+                                        toempIndex()
+                                    }
+                                });
+                            } else {
+                                javaex.alert({
+                                    content: "账户状态异常，请联系管理员",
+                                    confirm: function () {
+                                        todirectorIndex()
+                                    }
+                                });
+                            }
+                        }
+                    } else {
+                        javaex.tip({
+                            content: "操作失败",
+                            type: "error"
+                        });
+                        javaex.alert({
+                            content: response.message
+                        });
+                    }
+
+
+
+                },
+                error: function (data) {
+                    javaex.tip({
+                        content: "操作失败",
+                        type: "error"
+                    });
+                },
+                //调用执行后调用的函数
+                complete: function (XMLHttpRequest, textStatus) {
+                    if (textStatus == 'timeout') {
+                        uploadAjax.abort(); //取消请求
+                        //超时提示：请求超时，请重试
+                        javaex.tip({
+                            content: "操作失败",
+                            type: "error"
+                        });
+                        javaex.alert({
+                            content: "请求超时，请重试"
+                        });
+                    }
+                }
+            });
+        }
+
+
+
+
+
+
+
+        //注册  
+        //自动生成工号
+        function createworkId() {
+            return ` <div>
+                    <input id="workId" name="workId" class="form__input1" type="text" placeholder="工号自动生成" readonly value="` + `工号：` + parseInt(1000000000 * Math.random()) + `">
+                   
+                </div>
+                `
+        }
+
+
+
+        function getworkId() {
+            var html2 = "" + createworkId();
+
+            $("#h1").html(html2);
+        }
+
+        // function workid() {
+        //     return parseInt(10000000000 * Math.random())
+        // }
+
+        function toLogin() {
+            window.location.href = "../login.html";
+        }
+
+        function register() {
+            var workId1 = $("#workId").val();
+            var workId = workId1.substring(workId1.length - 9, workId1.length);
+            console.log(workId);
+            console.log(workId.length);
+
+
+
+            var repassword = $("#repassword").val();
+            var registername = $("#registername").val();
+
+            console.log(registername);
+            console.log(repassword);
+            var departId = $("#select").val();
+            console.log(departId);
+            console.log(typeof departId);
+            if (departId == "-1" || repassword == "") {
+                javaex.alert({
+                    content: "信息不能为空，请完善信息！"
+
+                })
+
+                return;
+            }
+
+            javaex.tip({
+                content: "数据提交中，请稍候...",
+                type: "submit"
+            });
+            $.ajax({
+                type: "post",
+                //后端需要调用的地址
+                url: "http://127.0.0.1:8080/employeeSystem/employee/register",
+                dataType: "json",
+                data: {
+                    "workid": workId,
+                    "name": registername,
+                    "password": repassword,
+                    "departid": departId,
+                },
+                // contentType: "json/application",
+                //设置超时
+                timeout: 10000,
+                async: true,
+                success: function (response) {
+                    javaex.tip({
+                        content: "注册成功",
+                        type: "success"
+                    });
+                    console.log(response);
+                    if (response.message == "success") {
+                        javaex.alert({
+                            content: "注册成功,等待管理员审批",
+                            confirm: function () {
+                                toLogin();
+                            }
+                        });
+                    } else if (response.message == "error") {
+                        javaex.alert({
+                            content: "error!",
+                        });
+                    }
+
+                },
+                error: function (data) {
+                    javaex.tip({
+                        content: "操作失败",
+                        type: "error"
+                    });
+                },
+                //调用执行后调用的函数
+                complete: function (XMLHttpRequest, textStatus) {
+                    if (textStatus == 'timeout') {
+                        uploadAjax.abort(); //取消请求
+                        //超时提示：请求超时，请重试
+                        javaex.tip({
+                            content: "操作失败",
+                            type: "error"
+                        });
+                        javaex.alert({
+                            content: "请求超时，请重试"
+                        });
+                    }
+                }
+            });
+        }
+
+        function tomanagerIndex() {
+            window.location.href = '../managerpages/index.html';
+        }
+
+        function toempIndex() {
+            window.location.href = '../employeepages/index.html';
+        }
+
+        function todirectorIndex() {
+            window.location.href = '../director/index.html';
+        }
+
+
+        window.onload = function () {
+            getworkId();
+            $.ajax({
+                type: "post",
+                url: "http://127.0.0.1:8080/employeeSystem/depart/getAllDepart", //此次url改为真正需要的url
+                dataType: "json",
+                success: function (data) {
+                    $.each(data.departList, function (index, item) {
+                        $("#select").append( //此处向select中循环绑定数据
+                            "<option value=" + item.departId + ">" + item.depart + "</option>");
+                    });
+                },
+            });
+
+        }
+
+        function createDepartList1() {
+            return `<option value="-1">请选择部门</option>`
+        }
+
+        function createDepartList(depart) {
+            return `<option value="-1">` + depart + `</option>`
+        }
+    </script>
+
+
+    <script src="js/login.js"></script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <!--字体图标-->
+    <link href="../javaex/pc/css/icomoon.css" rel="stylesheet" />
+    <!--动画-->
+    <link href="../javaex/pc/css/animate.css" rel="stylesheet" />
+    <!--骨架样式-->
+    <link href="../javaex/pc/css/common.css" rel="stylesheet" />
+    <!--皮肤（缇娜）-->
+    <link href="../javaex/pc/css/skin/tina.css" rel="stylesheet" />
+    <!--jquery，不可修改版本-->
+    <script src="../javaex/pc/lib/jquery-1.7.2.min.js"></script>
+    <!--全局动态修改-->
+    <script src="../javaex/pc/js/common.js"></script>
+    <!--核心组件-->
+    <script src="../javaex/pc/js/javaex.min.js"></script>
+    <!--表单验证-->
+    <script src="../javaex/pc/js/javaex-formVerify.js"></script>
+
+    <title>后台管理系统</title>
+    <style>
+
+    </style>
+</head>
+
+<body>
+    <!--顶部导航-->
+    <div class="admin-navbar" style="background: url(../image/back8.jpg);">
+        <div class="admin-container-fluid clear">
+            <!--logo名称-->
+            <div class="admin-logo" style="color: black;">员工事务管理系统-管理员</div>
+
+            <!--右侧-->
+            <ul class="admin-navbar-nav fr">
+                <li>
+                    <a href="javascript:;" id="username" style="color: black;">欢迎您，管理员</a>
+                    <ul class="dropdown-menu" style="right: 10px;">
+                        <!-- <li><a href="#">个人信息</a></li> -->
+                        <li><a onclick="exit()">退出当前账号</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!--主题内容-->
+    <div class="admin-mian">
+        <!--左侧菜单-->
+        <div class="admin-aside admin-aside-fixed" style="background: url(../image/back8.jpg);">
+            <h1><a href="javascript:page('main.html');"><span class="admin-nav-name">总览</span></a></h1>
+            <div id="admin-toc" class="admin-toc">
+                <div class="menu-box">
+                    <div id="menu" class="menu" style="background: url(../image/back8.jpg);">
+                        <ul>
+                            <li class="menu-item ">
+                                <a href="javascript:page( 'main.html'); ">系统主页<i class=" "></i></a>
+
+                            </li>
+                            <li class="menu-item">
+                                <a>员工管理<i class="icon-keyboard_arrow_left"></i></a>
+                                <ul>
+                                    <li><a href="javascript:page( 'personinfo.html'); ">所有员工信息<i class=" "></i></a></li>
+                                    <li><a href="javascript:page( 'employee.html'); ">在职员工<i class=" "></i></a></li>
+                                    <li><a href="javascript:page('examineemployee.html');">待审核</a></li>
+                                    <li><a href="javascript:page('quitemployee.html');">已离职</a></li>
+                                </ul>
+                            </li>
+
+
+
+                            <li class="menu-item ">
+                                <a href="javascript:page( 'depart.html'); ">部门管理<i class=" "></i></a>
+
+                            </li>
+
+                            <li class="menu-item ">
+                                <a href="javascript:page( 'apply.html'); ">申请管理<i class=" "></i></a>
+
+                            </li>
+
+                            <li class="menu-item ">
+                                <a href="javascript:page( 'notice.html'); ">通知管理<i class=" "></i></a>
+
+                            </li>
+
+                            <li class="menu-item ">
+                                <a href="javascript:page( 'feedback.html'); ">反馈管理<i class=" "></i></a>
+
+                            </li>
+
+                            <li class="menu-item ">
+                                <a href="javascript:page( 'file.html'); ">文件管理<i class=" "></i></a>
+
+                            </li>
+
+                            <li class="menu-item ">
+                                <a href="javascript:page( 'performance.html'); ">绩效管理<i class=" "></i></a>
+
+                            </li>
+
+                            <li class="menu-item ">
+                                <a href="javascript:page( 'daily.html'); ">日志管理<i class=" "></i></a>
+
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <!--iframe载入内容-->
+        <div class="admin-markdown">
+            <iframe id="page" src="main.html"></iframe>
+        </div>
+    </div>
+</body>
+<script>
+    function toLogin() {
+        window.location.href = "../login.html";
+    }
+
+    function exit() {
+        sessionStorage.clear();
+        toLogin();
+    }
+    var business;
+    window.onload = function() {
+        manager = JSON.parse(sessionStorage.getItem("manager"));
+        if (manager == null) {
+            javaex.alert({
+                content: "请先登录",
+                callback: "toLogin()"
+            })
+        }
+        $("#username").html("欢迎您，" + manager.name);
+    }
+
+    var hightUrl = "xxxx";
+    javaex.menu({
+        id: "menu",
+        isAutoSelected: true,
+        key: "",
+        url: hightUrl
+    });
+
+    $(function() {
+        // 设置左侧菜单高度
+        setMenuHeight();
+    });
+
+    /**
+     * 设置左侧菜单高度
+     */
+    function setMenuHeight() {
+        var height = document.documentElement.clientHeight - $("#admin-toc").offset().top;
+        height = height - 10;
+        $("#admin-toc").css("height", height + "px");
+    }
+
+    // 控制页面载入
+    function page(url) {
+        $("#page").attr("src", url);
+    }
+</script>
+
+
+
+</html>

@@ -1,0 +1,531 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!--字体图标-->
+    <link href="../javaex/pc/css/icomoon.css" rel="stylesheet" />
+    <!--动画-->
+    <link href="../javaex/pc/css/animate.css" rel="stylesheet" />
+    <!--骨架样式-->
+    <link href="../javaex/pc/css/common.css" rel="stylesheet" />
+    <!--皮肤（缇娜）-->
+    <link href="../javaex/pc/css/skin/tina.css" rel="stylesheet" />
+    <!--jquery，不可修改版本-->
+    <script src="../javaex/pc/lib/jquery-1.7.2.min.js"></script>
+    <!--全局动态修改-->
+    <script src="../javaex/pc/js/common.js"></script>
+    <!--核心组件-->
+    <script src="../javaex/pc/js/javaex.min.js"></script>
+    <!--表单验证-->
+    <script src="../javaex/pc/js/javaex-formVerify.js"></script>
+    <title></title>
+
+</head>
+
+<body>
+    <!--主体内容-->
+    <div class="list-content">
+        <!--块元素-->
+        <div class="block">
+            <!--页面有多个表格时，可以用于标识表格-->
+            <h2>文件管理</h2>
+            <!--右上角的返回按钮-->
+            <a href="javascript:history.back();">
+                <button class="button indigo radius-3" style="position: absolute;right: 20px;top: 16px;"><span class="icon-arrow_back"></span> 返回</button>
+            </a>
+
+            <!--正文内容-->
+            <div class="main">
+                <!--表格上方的搜索操作-->
+                <div class="admin-search">
+                    <div class="input-group">
+                        <input type="text" class="text" id="sousuo" placeholder="标题" />
+                        <button class="button blue" onclick="search()">搜索</button>
+                    </div>
+                </div>
+
+                <!--表格上方的操作元素，添加、删除等-->
+                <div class="operation-wrap">
+                    <div class="buttons-wrap">
+                        <button type="button" class="button blue" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">发送文件</button>
+                    </div>
+                </div>
+
+                <!-- 发送文件模态框 -->
+                <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title" id="exampleModalLabel">发送文件</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span></button>
+                            </div>
+                            <div class="modal-body">
+                                <form>
+                                    <div class="form-group">
+                                        <label for="recipient-name" class="col-form-label">接收者:</label>
+                                        <select id="select">
+                                            <option value="-1">请选择</option>
+                                            <option value="经理">我的经理</option>
+                                            <option value="00000">管理员</option>
+                                            
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="recipient-name" class="col-form-label">标题:</label>
+                                        <input type="text" class="form-control" id="title">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="recipient-name" class="col-form-label">内容:</label>
+                                        <input type="text" class="form-control" id="content">
+                                    </div>
+                                    <a href="javascript:;" class="javaex-file-container javaex-btn blue">
+                                        文件上传
+                                        <input type="file" class="javaex-file" id="upload" />
+                                    </a>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                                <button type="button" class="btn btn-primary" id="filesub" onclick="filesub()">提交</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <table id="table" class="table color2">
+                    <thead>
+                        <tr>
+                            <th>id</th>
+                            <th>发送人工号</th>
+                            <th>接收者工号 </th>
+                            <th>标题</th>
+                            <th>内容</th>
+                            <th>文件名</th>
+                            <th>时间</th>
+                            <th>下载</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="fileInfo">
+                    </tbody>
+                </table>
+                <div class="page">
+                    <ul id="page" class="pagination"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+</body>
+<script>
+    function reload() {
+        window.location.reload(true);
+    }
+    var sousuo = $("#sousuo").val();
+    var employee;
+    var pageCount, perPageCount = 10,
+        totalNum;
+    window.onload = function() {
+        employee = JSON.parse(sessionStorage.getItem("employee"));
+        javaex.optTip({
+            content: "数据获取中，请稍候...",
+            type: "submit"
+        });
+
+        console.log("employee.workId" + employee.workId);
+        console.log("sousuo" + sousuo);
+        $.ajax({
+            url: "http://127.0.0.1:8080/employeeSystem/file/getMyFilePage",
+            data: {
+                "workId": employee.workId,
+                "sousuo": sousuo,
+                "perPageCount": perPageCount,
+                "currentPage": 1
+
+            },
+            dataType: "json",
+            type: "post",
+            async: false,
+            cache: false,
+            success: function(res) {
+                if (res.message == "success") {
+                    javaex.optTip({
+                        content: "操作成功",
+                        type: "success"
+                    });
+                    sessionStorage.setItem("fileList", res.fileList)
+                        // console.log(res.goodsList)
+                    var html = "";
+                    var fileList = JSON.parse(res.fileList);
+                    for (var i = 0; i < fileList.length; i++) {
+                        html = html + createfileInfo(fileList[i]);
+                    }
+                    $("#fileInfo").html(html);
+                    pageCount = res.pageCount;
+                    totalNum = res.totalNum;
+                    javaex.page({
+                        id: "page",
+                        pageCount: pageCount, // 总页数
+                        currentPage: 1, // 默认选中第几页
+                        perPageCount: perPageCount, // 每页显示多少条，不填时，不显示该条数选择控件
+                        isShowJumpPage: true, // 是否显示跳页
+                        totalNum: totalNum, // 总条数，不填时，不显示
+                        position: "right",
+                        callback: function(rtn) {
+                            console.log("当前选中的页数：" + rtn.pageNum);
+                            console.log("每页显示条数：" + rtn.perPageCount);
+                            $.ajax({
+                                url: "http://127.0.0.1:8080/employeeSystem/file/getMyFilePage",
+                                data: {
+                                    "workId": employee.workId,
+                                    "sousuo": sousuo,
+                                    "perPageCount": rtn.perPageCount,
+                                    "currentPage": rtn.pageNum
+                                },
+                                dataType: "json",
+                                type: "post",
+                                async: false,
+                                cache: false,
+                                success: function(res) {
+                                    if (res.message == "success") {
+                                        sessionStorage.setItem("fileList", res.fileList)
+                                        console.log(res.fileList)
+                                        var html = "";
+                                        var fileList = JSON.parse(res.fileList);
+                                        for (var i = 0; i < fileList.length; i++) {
+                                            html = html + createfileInfo(fileList[i]);
+                                        }
+                                        $("#fileInfo").html(html);
+                                        pageCount = res.pageCount;
+                                        totalNum = res.totalNum;
+                                    } else {
+                                        javaex.alert({
+                                            content: res.message
+                                        });
+
+                                    }
+                                    javaex.render();
+                                    reload();
+                                },
+                                error: function() {
+                                    javaex.alert({
+                                        content: "有错误发生！"
+                                    });
+
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    javaex.optTip({
+                        content: "操作失败",
+                        type: "error"
+                    });
+                    javaex.alert({
+                        content: res.message
+                    });
+
+                }
+                javaex.render();
+            },
+            error: function() {
+                javaex.optTip({
+                    content: "操作失败",
+                    type: "error"
+                });
+                javaex.alert({
+                    content: "有错误发生！"
+                });
+
+            }
+        });
+    }
+
+    function createfileInfo(file) {
+        console.log(file);
+        if (file.time) {
+            var chinaStandard = file.time
+            var date = new Date(chinaStandard);
+            var y = date.getFullYear();
+            var m = date.getMonth() + 1;
+            m = m < 10 ? ('0' + m) : m;
+            var d = date.getDate();
+            d = d < 10 ? ('0' + d) : d;
+            var h = date.getHours();
+            var minute = date.getMinutes();
+            minute = minute < 10 ? ('0' + minute) : minute;
+            file.time = y + '年' + m + '月' + d + '日';
+        } else {
+            file.time = ""
+        }
+
+        return `<tr>
+                    <td>` + file.fileId + `</td>
+                    <td>` + file.sender + `</td>
+                    <td>` + file.recriver + `</td>
+                    <td>` + file.title + `</td>
+                    <td>` + file.content + `</td>
+                    <td  style="width: 250px;">` + file.fileUrl + `</td>
+                    <td>` + file.time + `</td>
+                    <td>
+                        <form action="http://127.0.0.1:8080/employeeSystem/file/downloadFile">
+                        <input type="hidden" name="filename" value="` + file.fileUrl + `">
+                        <button class="button blue" type="submit">下载此文件</button>
+    </form>
+                    </td>
+                </tr>`
+    }
+
+
+
+
+    function search() {
+        var sousuo = $("#sousuo").val();
+        javaex.optTip({
+            content: "数据提交中，请稍候...",
+            type: "submit"
+        });
+        $.ajax({
+            url: "http://127.0.0.1:8080/employeeSystem/file/getMyFilePage",
+            data: {
+                "workId": employee.workId,
+                "sousuo": sousuo,
+                "perPageCount": perPageCount,
+                "currentPage": 1
+            },
+            dataType: "json",
+            type: "post",
+            async: false,
+            cache: false,
+            success: function(res) {
+                if (res.message == "success") {
+                    javaex.optTip({
+                        content: "操作成功",
+                        type: "success"
+                    });
+                    // sessionStorage.setItem("goodsList", res.list)
+                    // console.log(res.goodsList)
+                    var html = "";
+                    var fileList = JSON.parse(res.fileList);
+                    for (var i = 0; i < fileList.length; i++) {
+                        html = html + createfileInfo(fileList[i]);
+                    }
+                    $("#fileInfo").html(html);
+                    pageCount = res.pageCount;
+                    totalNum = res.totalNum;
+                    javaex.page({
+                        id: "page",
+                        pageCount: pageCount, // 总页数
+                        currentPage: 1, // 默认选中第几页
+                        perPageCount: perPageCount, // 每页显示多少条，不填时，不显示该条数选择控件
+                        isShowJumpPage: true, // 是否显示跳页
+                        totalNum: totalNum, // 总条数，不填时，不显示
+                        position: "right",
+                        callback: function(rtn) {
+                            console.log("当前选中的页数：" + rtn.pageNum);
+                            console.log("每页显示条数：" + rtn.perPageCount);
+                            $.ajax({
+                                url: "http://127.0.0.1:8080/employeeSystem/file/getMyFilePage",
+                                data: {
+                                    "workId": employee.workId,
+                                    "sousuo": sousuo,
+                                    "perPageCount": rtn.perPageCount,
+                                    "currentPage": rtn.pageNum
+                                },
+                                dataType: "json",
+                                type: "post",
+
+                                success: function(res) {
+                                    if (res.message == "success") {
+                                        console.log(res.fileList)
+                                        var html = "";
+                                        var fileList = JSON.parse(res.fileList);
+                                        for (var i = 0; i < fileList.length; i++) {
+                                            html = html + createfileInfo(fileList[i]);
+                                        }
+                                        $("#fileInfo").html(html);
+                                        pageCount = res.pageCount;
+                                        totalNum = res.totalNum;
+                                    } else {
+                                        javaex.alert({
+                                            content: res.message
+                                        });
+
+                                    }
+                                    javaex.render();
+                                },
+                                error: function() {
+                                    javaex.alert({
+                                        content: "有错误发生！"
+                                    });
+
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    javaex.optTip({
+                        content: "操作失败",
+                        type: "error"
+                    });
+                    javaex.alert({
+                        content: res.message
+                    });
+
+                }
+                javaex.render();
+            },
+            error: function() {
+                javaex.optTip({
+                    content: "操作失败",
+                    type: "error"
+                });
+                javaex.alert({
+                    content: "有错误发生！"
+                });
+
+            }
+        });
+    }
+    var fileUrl = "";
+    $("#upload").click(function() {
+        javaex.upload({
+            type: "file",
+            url: "http://127.0.0.1:8080/employeeSystem/file/uploadFileByEmp", // 请求路径
+            id: "upload", // <input type="file" />的id
+            // param: {
+            //     "file": "file", // 参数名称，左边的 "file" 是固定必须的。   右边的 "file"是参数名，Spring中与MultipartFile的参数名保持一致
+            //     "projectId": projectId, // 除了file这个key，其他都是MultipartFile以外的参数（自定义）
+            //     "type": "2"
+            // },
+            param: "file",
+            isShowTip: true,
+            chooseAfter: function(rtn) {
+                // 选择文件后的回调函数，会返回一些文件信息
+                console.log(rtn.filename);
+                console.log(rtn.filesize);
+                console.log(rtn.fileSuffix);
+
+                // 通常可以在此处调用一个定时函数，配合进度条来友好得显示excel导入数据的进度
+            },
+            callback: function(rtn) {
+                console.log(rtn);
+                if (rtn.code == "000000") {
+                    fileUrl = rtn.fileUrl;
+                } else {
+                    javaex.optTip({
+                        content: "添加失败",
+                        type: "error"
+                    });
+                }
+
+            }
+        });
+    });
+
+    //上传文件
+    function filesub() {
+        var select = $("#select").val();
+        var title = $("#title").val();
+        var content = $("#content").val();
+        if (select == "") {
+            javaex.alert({
+                content: "接收者工号不能为空，请完善信息！",
+            });
+            return;
+        }
+
+        if (title == "") {
+            javaex.alert({
+                content: "标题不能为空，请完善信息！",
+            });
+            return;
+        }
+
+        if (content == "") {
+            javaex.alert({
+                content: "内容不能为空，请完善信息！",
+            });
+            return;
+        }
+        if (fileUrl == "") {
+            javaex.alert({
+                content: "文件不能为空，请完善信息！",
+            });
+            return;
+        }
+        javaex.optTip({
+            content: "数据提交中，请稍候...",
+            type: "submit"
+        });
+        $.ajax({
+            type: "post",
+            //后端需要调用的地址
+            url: "http://127.0.0.1:8080/employeeSystem/file/addFileByEmp",
+            dataType: "json",
+            data: {
+                "workId": employee.workId,
+                "departId": employee.departId,
+                "select": select,
+                "title": title,
+                "content": content,
+                "fileUrl": fileUrl
+            },
+            // contentType: "json/application",
+            //设置超时
+            timeout: 10000,
+            async: true,
+            success: function(response) {
+                javaex.optTip({
+                    content: "操作成功",
+                    type: "success"
+                });
+                console.log(response);
+                if (response.message == "success") {
+                    javaex.alert({
+                        content: "文件上传成功",
+                        callback: location.reload()
+                    });
+
+                } else {
+                    javaex.alert({
+                        content: response.message,
+                    });
+                }
+
+            },
+            error: function(response) {
+                javaex.optTip({
+                    content: "操作失败",
+                    type: "error"
+                });
+            },
+            //调用执行后调用的函数
+            complete: function(XMLHttpRequest, textStatus) {
+                if (textStatus == 'timeout') {
+                    uploadAjax.abort(); //取消请求
+                    //超时提示：请求超时，请重试
+                    javaex.optTip({
+                        content: "操作失败",
+                        type: "error"
+                    });
+                    javaex.alert({
+                        content: "请求超时，请重试"
+                    });
+                }
+            }
+        });
+    }
+</script>
+
+</html>

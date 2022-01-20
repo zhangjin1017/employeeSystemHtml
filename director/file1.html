@@ -1,0 +1,344 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!--字体图标-->
+    <link href="../javaex/pc/css/icomoon.css" rel="stylesheet" />
+    <!--动画-->
+    <link href="../javaex/pc/css/animate.css" rel="stylesheet" />
+    <!--骨架样式-->
+    <link href="../javaex/pc/css/common.css" rel="stylesheet" />
+    <!--皮肤（缇娜）-->
+    <link href="../javaex/pc/css/skin/tina.css" rel="stylesheet" />
+    <!--jquery，不可修改版本-->
+    <script src="../javaex/pc/lib/jquery-1.7.2.min.js"></script>
+    <!--全局动态修改-->
+    <script src="../javaex/pc/js/common.js"></script>
+    <!--核心组件-->
+    <script src="../javaex/pc/js/javaex.min.js"></script>
+    <!--表单验证-->
+    <script src="../javaex/pc/js/javaex-formVerify.js"></script>
+    <title></title>
+
+</head>
+
+<body>
+    <!--主体内容-->
+    <div class="list-content">
+        <!--块元素-->
+        <div class="block">
+            <!--页面有多个表格时，可以用于标识表格-->
+            <h2>文件管理/接收的文件</h2>
+
+            <!--右上角的返回按钮-->
+            <a href="javascript:history.back();">
+                <button class="button indigo radius-3" style="position: absolute;right: 20px;top: 16px;"><span class="icon-arrow_back"></span> 返回</button>
+            </a>
+
+            <!--正文内容-->
+            <div class="main">
+                <!--表格上方的搜索操作-->
+                <div class="admin-search">
+                    <div class="input-group">
+                        <input type="text" class="text" id="sousuo" placeholder="标题" />
+                        <button class="button blue" onclick="search()">搜索</button>
+                    </div>
+                </div>
+
+                <table id="table" class="table color2">
+                    <thead>
+                        <tr>
+                            <th>id</th>
+                            <th>发送人工号</th>
+                            <th>接收者工号 </th>
+                            <th>标题</th>
+                            <th>内容</th>
+                            <th>文件名</th>
+                            <th>时间</th>
+                            <th>下载</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="fileInfo">
+                    </tbody>
+                </table>
+                <div class="page">
+                    <ul id="page" class="pagination"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    function reload() {
+        window.location.reload(true);
+    }
+    var sousuo = $("#sousuo").val();
+    var employee;
+    var pageCount, perPageCount = 10,
+        totalNum;
+    window.onload = function() {
+        employee = JSON.parse(sessionStorage.getItem("employee"));
+        javaex.optTip({
+            content: "数据获取中，请稍候...",
+            type: "submit"
+        });
+
+        console.log("employee.workId" + employee.workId);
+        console.log("sousuo" + sousuo);
+        $.ajax({
+            url: "http://127.0.0.1:8080/employeeSystem/file/getMyFilePage1",
+            data: {
+                "workId": employee.workId,
+                "sousuo": sousuo,
+                "perPageCount": perPageCount,
+                "currentPage": 1
+
+            },
+            dataType: "json",
+            type: "post",
+            async: false,
+            cache: false,
+            success: function(res) {
+                if (res.message == "success") {
+                    javaex.optTip({
+                        content: "操作成功",
+                        type: "success"
+                    });
+                    sessionStorage.setItem("fileList1", res.fileList1)
+                        // console.log(res.goodsList)
+                    var html = "";
+                    var fileList1 = JSON.parse(res.fileList1);
+                    for (var i = 0; i < fileList1.length; i++) {
+                        html = html + createfileInfo(fileList1[i]);
+                    }
+                    $("#fileInfo").html(html);
+                    pageCount = res.pageCount;
+                    totalNum = res.totalNum;
+                    javaex.page({
+                        id: "page",
+                        pageCount: pageCount, // 总页数
+                        currentPage: 1, // 默认选中第几页
+                        perPageCount: perPageCount, // 每页显示多少条，不填时，不显示该条数选择控件
+                        isShowJumpPage: true, // 是否显示跳页
+                        totalNum: totalNum, // 总条数，不填时，不显示
+                        position: "right",
+                        callback: function(rtn) {
+                            console.log("当前选中的页数：" + rtn.pageNum);
+                            console.log("每页显示条数：" + rtn.perPageCount);
+                            $.ajax({
+                                url: "http://127.0.0.1:8080/employeeSystem/file/getMyFilePage1",
+                                data: {
+                                    "workId": employee.workId,
+                                    "sousuo": sousuo,
+                                    "perPageCount": rtn.perPageCount,
+                                    "currentPage": rtn.pageNum
+                                },
+                                dataType: "json",
+                                type: "post",
+                                async: false,
+                                cache: false,
+                                success: function(res) {
+                                    if (res.message == "success") {
+                                        sessionStorage.setItem("fileList1", res.fileList1)
+                                        console.log(res.fileList1)
+                                        var html = "";
+                                        var fileList1 = JSON.parse(res.fileList1);
+                                        for (var i = 0; i < fileList1.length; i++) {
+                                            html = html + createfileInfo(fileList1[i]);
+                                        }
+                                        $("#fileInfo").html(html);
+                                        pageCount = res.pageCount;
+                                        totalNum = res.totalNum;
+                                    } else {
+                                        javaex.alert({
+                                            content: res.message
+                                        });
+
+                                    }
+                                    javaex.render();
+                                    reload();
+                                },
+                                error: function() {
+                                    javaex.alert({
+                                        content: "有错误发生！"
+                                    });
+
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    javaex.optTip({
+                        content: "操作失败",
+                        type: "error"
+                    });
+                    javaex.alert({
+                        content: res.message
+                    });
+
+                }
+                javaex.render();
+            },
+            error: function() {
+                javaex.optTip({
+                    content: "操作失败",
+                    type: "error"
+                });
+                javaex.alert({
+                    content: "有错误发生！"
+                });
+
+            }
+        });
+    }
+
+    function createfileInfo(file) {
+        console.log(file);
+        if (file.time) {
+            var chinaStandard = file.time
+            var date = new Date(chinaStandard);
+            var y = date.getFullYear();
+            var m = date.getMonth() + 1;
+            m = m < 10 ? ('0' + m) : m;
+            var d = date.getDate();
+            d = d < 10 ? ('0' + d) : d;
+            var h = date.getHours();
+            var minute = date.getMinutes();
+            minute = minute < 10 ? ('0' + minute) : minute;
+            file.time = y + '年' + m + '月' + d + '日';
+        } else {
+            file.time = ""
+        }
+
+        return `<tr>
+                    <td>` + file.fileId + `</td>
+                    <td>` + file.sender + `</td>
+                    <td>` + file.recriver + `</td>
+                    <td>` + file.title + `</td>
+                    <td>` + file.content + `</td>
+                    <td  style="width: 400px;">` + file.fileUrl + `</td>
+                    <td>` + file.time + `</td>
+                    <td style="text-align:center;">
+                        <form action="http://127.0.0.1:8080/employeeSystem/file/downloadFile">
+                        <input type="hidden" name="filename" value="` + file.fileUrl + `">
+                        <button class="button blue" type="submit" >下载此文件</button>
+                        </form>
+                    </td>
+                </tr>`
+    }
+
+    function search() {
+        var sousuo = $("#sousuo").val();
+        javaex.optTip({
+            content: "数据提交中，请稍候...",
+            type: "submit"
+        });
+        $.ajax({
+            url: "http://127.0.0.1:8080/employeeSystem/file/getMyFilePage1",
+            data: {
+                "workId": employee.workId,
+                "sousuo": sousuo,
+                "perPageCount": perPageCount,
+                "currentPage": 1
+            },
+            dataType: "json",
+            type: "post",
+            async: false,
+            cache: false,
+            success: function(res) {
+                if (res.message == "success") {
+                    javaex.optTip({
+                        content: "操作成功",
+                        type: "success"
+                    });
+                    // sessionStorage.setItem("goodsList", res.list)
+                    // console.log(res.goodsList)
+                    var html = "";
+                    var fileList1 = JSON.parse(res.fileList1);
+                    for (var i = 0; i < fileList1.length; i++) {
+                        html = html + createfileInfo(fileList1[i]);
+                    }
+                    $("#fileInfo").html(html);
+                    pageCount = res.pageCount;
+                    totalNum = res.totalNum;
+                    javaex.page({
+                        id: "page",
+                        pageCount: pageCount, // 总页数
+                        currentPage: 1, // 默认选中第几页
+                        perPageCount: perPageCount, // 每页显示多少条，不填时，不显示该条数选择控件
+                        isShowJumpPage: true, // 是否显示跳页
+                        totalNum: totalNum, // 总条数，不填时，不显示
+                        position: "right",
+                        callback: function(rtn) {
+                            console.log("当前选中的页数：" + rtn.pageNum);
+                            console.log("每页显示条数：" + rtn.perPageCount);
+                            $.ajax({
+                                url: "http://127.0.0.1:8080/employeeSystem/file/getMyFilePage1",
+                                data: {
+                                    "workId": employee.workId,
+                                    "sousuo": sousuo,
+                                    "perPageCount": rtn.perPageCount,
+                                    "currentPage": rtn.pageNum
+                                },
+                                dataType: "json",
+                                type: "post",
+
+                                success: function(res) {
+                                    if (res.message == "success") {
+                                        console.log(res.fileList1)
+                                        var html = "";
+                                        var fileList1 = JSON.parse(res.fileList1);
+                                        for (var i = 0; i < fileList1.length; i++) {
+                                            html = html + createfileInfo(fileList1[i]);
+                                        }
+                                        $("#fileInfo").html(html);
+                                        pageCount = res.pageCount;
+                                        totalNum = res.totalNum;
+                                    } else {
+                                        javaex.alert({
+                                            content: res.message
+                                        });
+
+                                    }
+                                    javaex.render();
+                                },
+                                error: function() {
+                                    javaex.alert({
+                                        content: "有错误发生！"
+                                    });
+
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    javaex.optTip({
+                        content: "操作失败",
+                        type: "error"
+                    });
+                    javaex.alert({
+                        content: res.message
+                    });
+
+                }
+                javaex.render();
+            },
+            error: function() {
+                javaex.optTip({
+                    content: "操作失败",
+                    type: "error"
+                });
+                javaex.alert({
+                    content: "有错误发生！"
+                });
+
+            }
+        });
+    }
+</script>
+
+</html>

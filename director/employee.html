@@ -1,0 +1,553 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!--字体图标-->
+    <link href="../javaex/pc/css/icomoon.css" rel="stylesheet" />
+    <!--动画-->
+    <link href="../javaex/pc/css/animate.css" rel="stylesheet" />
+    <!--骨架样式-->
+    <link href="../javaex/pc/css/common.css" rel="stylesheet" />
+    <!--皮肤（缇娜）-->
+    <link href="../javaex/pc/css/skin/tina.css" rel="stylesheet" />
+    <!--jquery，不可修改版本-->
+    <script src="../javaex/pc/lib/jquery-1.7.2.min.js"></script>
+    <!--全局动态修改-->
+    <script src="../javaex/pc/js/common.js"></script>
+    <!--核心组件-->
+    <script src="../javaex/pc/js/javaex.min.js"></script>
+    <!--表单验证-->
+    <script src="../javaex/pc/js/javaex-formVerify.js"></script>
+
+
+    <title></title>
+
+</head>
+
+<body>
+    <!--主体内容-->
+    <div class="list-content">
+        <!--块元素-->
+        <div class="block">
+            <!--页面有多个表格时，可以用于标识表格-->
+            <h2 id="depart1">部门员工</h2>
+            <!--右上角的返回按钮-->
+            <a href="javascript:history.back();">
+                <button class="button indigo radius-3" style="position: absolute;right: 20px;top: 16px;"><span class="icon-arrow_back"></span> 返回</button>
+            </a>
+
+            <!--正文内容-->
+            <div class="main">
+                <!--表格上方的搜索操作-->
+                <div class="admin-search">
+                    <div class="input-group">
+                        <input type="text" class="text" id="sousuo" placeholder="员工工号" />
+                        <button class="button blue" onclick="search()">搜索</button>
+                    </div>
+                </div>
+
+
+
+
+
+
+
+
+
+
+                <table id="table" class="table color2">
+                    <thead>
+
+                        <tr>
+                            <th style="text-align: center;">员工id</th>
+                            <th style="text-align: center;">员工工号</th>
+                            <th style="text-align: center;">姓名</th>
+                            <th style="text-align: center;">职位
+                            </th>
+
+                            <th style="text-align: center;">状态</th>
+                            <th style="text-align: center;">QQ</th>
+
+
+                            <th style="text-align: center;">操作</th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody id="employeeInfo" style="text-align: center;">
+                    </tbody>
+                </table>
+                <div class="page">
+                    <ul id="page" class="pagination"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    function reload() {
+        window.location.reload(true);
+    }
+
+    var emp = sessionStorage.getItem("employee");
+
+    console.log("11" + JSON.parse(emp).departId);
+    var sousuo = $("#sousuo").val();
+    var pageCount, perPageCount = 10,
+        totalNum;
+
+    window.onload = function() {
+        $("#page").empty();
+        javaex.optTip({
+            content: "数据获取中，请稍候...",
+            type: "submit"
+        });
+        $.ajax({
+            url: "http://127.0.0.1:8080/employeeSystem/employee/getDepartEmployeePage",
+            data: {
+                "departId": JSON.parse(emp).departId,
+                "sousuo": sousuo,
+                "perPageCount": perPageCount,
+                "currentPage": 1
+            },
+            dataType: "json",
+            type: "post",
+            async: true,
+            cache: true,
+            success: function(res) {
+                if (res.message == "success") {
+                    javaex.optTip({
+                        content: "加载成功",
+                        type: "success"
+                    });
+                    sessionStorage.setItem("empList", res.empList)
+                    sessionStorage.setItem("qqList", res.qqList)
+                    $("#depart1").html(JSON.parse(res.myDepart));
+                    console.log(1);
+                    console.log(res.empList)
+                    console.log(2);
+                    console.log(res.qqList)
+                    var html = "";
+
+                    var empList = JSON.parse(res.empList);
+                    var qqList = JSON.parse(res.qqList);
+
+                    // var directortList = JSON.parse(res.directortList);
+                    for (var i = 0; i < empList.length; i++) {
+                        html = html + createEmployeeInfo(empList[i], qqList[i]);
+                    }
+                    $("#employeeInfo").html(html);
+                    pageCount = res.pageCount;
+                    console.log(pageCount);
+                    totalNum = res.totalNum;
+                    console.log(totalNum);
+                    $("#page").empty();
+                    javaex.page({
+                        id: "page",
+                        pageCount: pageCount, // 总页数
+                        currentPage: 1, // 默认选中第几页
+                        perPageCount: perPageCount, // 每页显示多少条，不填时，不显示该条数选择控件
+                        isShowJumpPage: true, // 是否显示跳页
+                        totalNum: totalNum, // 总条数，不填时，不显示
+                        position: "right",
+                        callback: function(rtn) {
+                            console.log("当前选中的页数：" + rtn.pageNum);
+                            console.log("每页显示条数：" + rtn.perPageCount);
+                            $.ajax({
+                                url: "http://127.0.0.1:8080/employeeSystem/employee/getDepartEmployeePage",
+                                data: {
+                                    "departId": JSON.parse(emp).departId,
+                                    "sousuo": sousuo,
+                                    "perPageCount": rtn.perPageCount,
+                                    "currentPage": rtn.pageNum
+                                },
+                                dataType: "json",
+                                type: "post",
+                                async: true,
+                                cache: true,
+                                success: function(res) {
+                                    if (res.message == "success") {
+                                        sessionStorage.setItem("empList", res.empList)
+                                        sessionStorage.setItem("qqList", res.qqList)
+                                        $("#depart1").html(JSON.parse(res.myDepart));
+                                        console.log(res.empList)
+                                        console.log(res.qqList)
+                                        var html = "";
+                                        var empList = JSON.parse(res.empList);
+                                        var empList = JSON.parse(res.qqList);
+                                        // var directortList = JSON.parse(res.directortList);
+                                        for (var i = 0; i < empList.length; i++) {
+                                            html = html + createEmployeeInfo(empList[i], qqList[i]);
+                                        }
+                                        $("#employeeInfo").html(html);
+                                        pageCount = res.pageCount;
+
+                                        totalNum = res.totalNum;
+                                    } else {
+                                        javaex.alert({
+                                            content: res.message
+                                        });
+
+                                    }
+                                    // javaex.render();
+                                    // reload();
+                                },
+                                error: function() {
+                                    javaex.alert({
+                                        content: "有错误发生！"
+                                    });
+
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    javaex.optTip({
+                        content: "加载失败",
+                        type: "error"
+                    });
+                    javaex.alert({
+                        content: res.message
+                    });
+
+                }
+                javaex.render();
+            },
+            error: function() {
+                javaex.optTip({
+                    content: "加载失败",
+                    type: "error"
+                });
+                javaex.alert({
+                    content: "有错误发生！"
+                });
+
+            }
+        });
+    }
+
+    //  创建员工信息
+    function createEmployeeInfo(employee, qq) {
+        if (employee.outtime == undefined && employee.position != undefined) {
+            employee.outtime = ""
+        }
+        if (employee.stateId == 1) {
+            employee.stateId = "在职"
+        }
+        if (employee.stateId == 5) {
+            employee.stateId = "停职"
+        }
+        if (employee.stateId == 9) {
+            employee.stateId = "请假"
+        }
+
+        if (employee.outtime == undefined && employee.position == undefined) {
+            employee.outtime = "待审核"
+            employee.position = "待审核"
+        }
+        var chinaStandard = employee.intime
+        var date = new Date(chinaStandard);
+        var y = date.getFullYear();
+        var m = date.getMonth() + 1;
+        m = m < 10 ? ('0' + m) : m;
+        var d = date.getDate();
+        d = d < 10 ? ('0' + d) : d;
+        var h = date.getHours();
+        var minute = date.getMinutes();
+        minute = minute < 10 ? ('0' + minute) : minute;
+        employee.intime = y + '-' + m + '-' + d + ' ' + h + ':' + minute;
+        if (qq == null) {
+            qq = "暂未填写qq"
+        }
+        if (employee.position == "员工") {
+            if (employee.stateId == "停职") {
+                return `<tr>
+                    <td>` + employee.empId + `</td>
+                    <td>` + employee.workId + `</td>
+                    <td>` + employee.name + `</td>
+                    <td>` + employee.position + `</td>
+                    <td style="color:red">` + employee.stateId + `</td>
+                    <td>` + qq + `</td>
+                    <td> <a href="http://wpa.qq.com/msgrd?v=3&uin=` + qq + `&site=qq&menu=yes"><button class="button yellow">一键QQ联系</button></a>
+
+                    </td>  
+                        
+                </tr>`
+            } else if (employee.stateId == "请假") {
+                return `<tr>
+                    <td>` + employee.empId + `</td>
+                    <td>` + employee.workId + `</td>
+                    <td>` + employee.name + `</td>
+                    <td>` + employee.position + `</td>
+                    <td style="color:orange">` + employee.stateId + `</td>
+                    <td>` + qq + `</td>
+                    <td> <a href="http://wpa.qq.com/msgrd?v=3&uin=` + qq + `&site=qq&menu=yes"><button class="button yellow">一键QQ联系</button></a>
+
+                    </td>  
+                        
+                </tr>`
+            } else {
+                return `<tr>
+                    <td>` + employee.empId + `</td>
+                    <td>` + employee.workId + `</td>
+                    <td>` + employee.name + `</td>
+                    <td>` + employee.position + `</td>
+                    <td>` + employee.stateId + `</td>
+                    <td>` + qq + `</td>
+                    <td> <a href="http://wpa.qq.com/msgrd?v=3&uin=` + qq + `&site=qq&menu=yes"><button class="button yellow">一键QQ联系</button></a>
+
+                    </td>  
+                        
+                </tr>`
+            }
+
+        } else {
+            if (employee.stateId == "停职") {
+                return `<tr>
+                    <td>` + employee.empId + `</td>
+                    <td>` + employee.workId + `</td>
+                    <td>` + employee.name + `</td>
+                    <td>` + employee.position + `</td>
+                    <td style="color:red">` + employee.stateId + `</td>
+                    <td>` + qq + `</td>
+                    <td> <a href="http://wpa.qq.com/msgrd?v=3&uin=` + qq + `&site=qq&menu=yes"><button class="button yellow">一键QQ联系</button></a>
+                    <button class="button green" onclick="sub(` + employee.workId + `,` + employee.empId + `)">转正</button>
+
+                    </td>  
+                        
+                </tr>`
+            } else if (employee.stateId == "请假") {
+                return `<tr>
+                    <td>` + employee.empId + `</td>
+                    <td>` + employee.workId + `</td>
+                    <td>` + employee.name + `</td>
+                    <td>` + employee.position + `</td>
+                    <td style="color:orange">` + employee.stateId + `</td>
+                    <td>` + qq + `</td>
+                    <td> <a href="http://wpa.qq.com/msgrd?v=3&uin=` + qq + `&site=qq&menu=yes"><button class="button yellow">一键QQ联系</button></a>
+                    <button class="button green" onclick="sub(` + employee.workId + `,` + employee.empId + `)">转正</button>
+
+                    </td>  
+                        
+                </tr>`
+            } else {
+                return `<tr>
+                    <td>` + employee.empId + `</td>
+                    <td>` + employee.workId + `</td>
+                    <td>` + employee.name + `</td>
+                    <td>` + employee.position + `</td>
+                    <td>` + employee.stateId + `</td>
+                    <td>` + qq + `</td>
+                    <td> <a href="http://wpa.qq.com/msgrd?v=3&uin=` + qq + `&site=qq&menu=yes"><button class="button yellow">一键QQ联系</button></a>
+                    <button class="button green" onclick="sub(` + employee.workId + `,` + employee.empId + `)">转正</button>
+
+                    </td>  
+                        
+                </tr>`
+            }
+        }
+
+    }
+
+    //搜索
+    function search() {
+        var sousuo = $("#sousuo").val();
+        javaex.optTip({
+            content: "数据提交中，请稍候...",
+            type: "submit"
+        });
+        $.ajax({
+            url: "http://127.0.0.1:8080/employeeSystem/employee/getDepartEmployeePage",
+            data: {
+                "departId": JSON.parse(emp).departId,
+                "sousuo": sousuo,
+                "perPageCount": perPageCount,
+                "currentPage": 1
+            },
+            dataType: "json",
+            type: "post",
+            async: false,
+            cache: false,
+            success: function(res) {
+                if (res.message == "success") {
+                    javaex.optTip({
+                        content: "加载成功",
+                        type: "success"
+                    });
+                    sessionStorage.setItem("empList", res.empList)
+                    sessionStorage.setItem("qqList", res.qqList)
+                    $("#depart1").html(JSON.parse(res.myDepart));
+                    console.log(1);
+                    console.log(res.empList)
+                    console.log(2);
+                    console.log(res.qqList)
+                    var html = "";
+
+                    var empList = JSON.parse(res.empList);
+                    var qqList = JSON.parse(res.qqList);
+
+                    // var directortList = JSON.parse(res.directortList);
+                    for (var i = 0; i < empList.length; i++) {
+                        html = html + createEmployeeInfo(empList[i], qqList[i]);
+                    }
+                    $("#employeeInfo").html(html);
+                    pageCount = res.pageCount;
+                    console.log(pageCount);
+                    totalNum = res.totalNum;
+                    console.log(totalNum);
+                    $("#page").empty();
+                    javaex.page({
+                        id: "page",
+                        pageCount: pageCount, // 总页数
+                        currentPage: 1, // 默认选中第几页
+                        perPageCount: perPageCount, // 每页显示多少条，不填时，不显示该条数选择控件
+                        isShowJumpPage: true, // 是否显示跳页
+                        totalNum: totalNum, // 总条数，不填时，不显示
+                        position: "right",
+                        callback: function(rtn) {
+                            console.log("当前选中的页数：" + rtn.pageNum);
+                            console.log("每页显示条数：" + rtn.perPageCount);
+                            $.ajax({
+                                url: "http://127.0.0.1:8080/employeeSystem/employee/getDepartEmployeePage",
+                                data: {
+                                    "departId": JSON.parse(emp).departId,
+                                    "sousuo": sousuo,
+                                    "perPageCount": rtn.perPageCount,
+                                    "currentPage": rtn.pageNum
+                                },
+                                dataType: "json",
+                                type: "post",
+                                async: true,
+                                cache: true,
+                                success: function(res) {
+                                    if (res.message == "success") {
+                                        sessionStorage.setItem("empList", res.empList)
+                                        sessionStorage.setItem("qqList", res.qqList)
+                                        $("#depart1").html(JSON.parse(res.myDepart));
+                                        console.log(res.empList)
+                                        console.log(res.qqList)
+                                        var html = "";
+                                        var empList = JSON.parse(res.empList);
+                                        var empList = JSON.parse(res.qqList);
+                                        // var directortList = JSON.parse(res.directortList);
+                                        for (var i = 0; i < empList.length; i++) {
+                                            html = html + createEmployeeInfo(empList[i], qqList[i]);
+                                        }
+                                        $("#employeeInfo").html(html);
+                                        pageCount = res.pageCount;
+
+                                        totalNum = res.totalNum;
+                                    } else {
+                                        javaex.alert({
+                                            content: res.message
+                                        });
+
+                                    }
+                                    // javaex.render();
+                                    // reload();
+                                },
+                                error: function() {
+                                    javaex.alert({
+                                        content: "有错误发生！"
+                                    });
+
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    javaex.optTip({
+                        content: "操作失败",
+                        type: "error"
+                    });
+                    javaex.alert({
+                        content: res.message
+                    });
+
+                }
+                javaex.render();
+            },
+            error: function() {
+                javaex.optTip({
+                    content: "操作失败",
+                    type: "error"
+                });
+                javaex.alert({
+                    content: "有错误发生！"
+                });
+
+            }
+        });
+    }
+
+
+
+    //转正
+    function sub(workId, empId) {
+
+        javaex.optTip({
+            content: "数据提交中，请稍候...",
+            type: "submit"
+        });
+        $.ajax({
+            type: "post",
+            //后端需要调用的地址
+            url: "http://127.0.0.1:8080/employeeSystem/director/zhuanzhengEmp",
+            dataType: "json",
+            data: {
+                "empId": empId,
+                "workId": workId,
+            },
+            // contentType: "json/application",
+            //设置超时
+            timeout: 10000,
+            async: true,
+            success: function(response) {
+                javaex.optTip({
+                    content: "操作成功",
+                    type: "success"
+                });
+                console.log(response);
+                if (response.message == "转正成功") {
+
+                    javaex.alert({
+                        content: "操作成功"
+                    });
+                    location.reload();
+                }
+                if (response.message == "发生错误,转正失败") {
+                    javaex.alert({
+                        content: "操作成功"
+                    });
+                    location.reload();
+                }
+
+            },
+            error: function(data) {
+                javaex.optTip({
+                    content: "操作失败",
+                    type: "error"
+                });
+            },
+            //调用执行后调用的函数
+            complete: function(XMLHttpRequest, textStatus) {
+                if (textStatus == 'timeout') {
+                    uploadAjax.abort(); //取消请求
+                    //超时提示：请求超时，请重试
+                    javaex.optTip({
+                        content: "操作失败",
+                        type: "error"
+                    });
+                    javaex.alert({
+                        content: "请求超时，请重试"
+                    });
+                }
+            }
+        });
+    }
+</script>
+
+</html>

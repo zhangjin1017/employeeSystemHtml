@@ -1,0 +1,486 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!--字体图标-->
+    <link href="../javaex/pc/css/icomoon.css" rel="stylesheet" />
+    <!--动画-->
+    <link href="../javaex/pc/css/animate.css" rel="stylesheet" />
+    <!--骨架样式-->
+    <link href="../javaex/pc/css/common.css" rel="stylesheet" />
+    <!--皮肤（缇娜）-->
+    <link href="../javaex/pc/css/skin/tina.css" rel="stylesheet" />
+    <!--jquery，不可修改版本-->
+    <script src="../javaex/pc/lib/jquery-1.7.2.min.js"></script>
+    <!--全局动态修改-->
+    <script src="../javaex/pc/js/common.js"></script>
+    <!--核心组件-->
+    <script src="../javaex/pc/js/javaex.min.js"></script>
+    <!--表单验证-->
+    <script src="../javaex/pc/js/javaex-formVerify.js"></script>
+
+    <link rel="stylesheet" href="../css/anniu.css">
+
+    <title></title>
+
+</head>
+
+<body>
+    <!--主体内容-->
+    <div class="list-content">
+        <!--块元素-->
+        <div class="block">
+            <!--页面有多个表格时，可以用于标识表格-->
+            <h2>员工管理</h2>
+            <!--右上角的返回按钮-->
+            <a href="javascript:history.back();">
+                <button class="button indigo radius-3" style="position: absolute;right: 20px;top: 16px;"><span class="icon-arrow_back"></span> 返回</button>
+            </a>
+
+            <!--正文内容-->
+            <div class="main">
+                <!--表格上方的搜索操作-->
+                <div class="admin-search">
+                    <div class="input-group">
+                        <input type="text" class="text" id="sousuo" placeholder="姓名" />
+                        <button class="button blue" onclick="search()">搜索</button>
+                    </div>
+                </div>
+
+
+
+
+
+
+
+
+                <table id="table" class="table color2">
+                    <thead>
+
+
+                        <tr>
+                            <th style="text-align: center;">id</th>
+                            <th style="text-align: center;">姓名</th>
+                            <th style="text-align: center;">性别</th>
+                            <th style="text-align: center;">年龄</th>
+                            <th style="text-align: center;">手机号</th>
+                            <th style="text-align: center;">qq</th>
+                            <th style="text-align: center;">操作</th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody id="personinfo" style="text-align: center;">
+                    </tbody>
+                </table>
+                <div class="page">
+                    <ul id="page" class="pagination"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    function reload() {
+        window.location.reload(true);
+    }
+
+
+    var sousuo = $("#sousuo").val();
+    var pageCount, perPageCount = 10,
+        totalNum;
+
+    window.onload = function() {
+        $("#page").empty();
+        javaex.optTip({
+            content: "数据获取中，请稍候...",
+            type: "submit"
+        });
+        $.ajax({
+            url: "http://127.0.0.1:8080/employeeSystem/employee/getpersoninfo",
+            data: {
+                "sousuo": sousuo,
+                "perPageCount": perPageCount,
+                "currentPage": 1
+            },
+            dataType: "json",
+            type: "post",
+            async: true,
+            cache: true,
+            success: function(res) {
+                if (res.message == "success") {
+                    javaex.optTip({
+                        content: "加载成功",
+                        type: "success"
+                    });
+                    sessionStorage.setItem("personinfoList", res.personinfoList)
+                    console.log(1);
+                    console.log(res.personinfoList)
+                    var html = "";
+
+                    var personinfoList = JSON.parse(res.personinfoList);
+                    console.log(personinfoList);
+                    // var directortList = JSON.parse(res.directortList);
+                    for (var i = 0; i < personinfoList.length; i++) {
+                        html = html + createpersonInfo(personinfoList[i]);
+                    }
+                    $("#personinfo").html(html);
+                    pageCount = res.pageCount;
+                    console.log(pageCount);
+                    totalNum = res.totalNum;
+                    console.log(totalNum);
+                    $("#page").empty();
+                    javaex.page({
+                        id: "page",
+                        pageCount: pageCount, // 总页数
+                        currentPage: 1, // 默认选中第几页
+                        perPageCount: perPageCount, // 每页显示多少条，不填时，不显示该条数选择控件
+                        isShowJumpPage: true, // 是否显示跳页
+                        totalNum: totalNum, // 总条数，不填时，不显示
+                        position: "right",
+                        callback: function(rtn) {
+                            console.log("当前选中的页数：" + rtn.pageNum);
+                            console.log("每页显示条数：" + rtn.perPageCount);
+                            $.ajax({
+                                url: "http://127.0.0.1:8080/employeeSystem/employee/getpersoninfo",
+                                data: {
+                                    "sousuo": sousuo,
+                                    "perPageCount": rtn.perPageCount,
+                                    "currentPage": rtn.pageNum
+                                },
+                                dataType: "json",
+                                type: "post",
+                                async: true,
+                                cache: true,
+                                success: function(res) {
+                                    if (res.message == "success") {
+                                        sessionStorage.setItem("personinfoList", res.personinfoList)
+                                        console.log(res.personinfoList)
+                                        var html = "";
+                                        var personinfoList = JSON.parse(res.personinfoList);
+                                        // var personinfoList = JSON.parse(res.personinfoList);
+                                        for (var i = 0; i < personinfoList.length; i++) {
+                                            html = html + createpersonInfo(personinfoList[i]);
+                                        }
+                                        $("#personinfo").html(html);
+                                        pageCount = res.pageCount;
+
+                                        totalNum = res.totalNum;
+                                    } else {
+                                        javaex.alert({
+                                            content: res.message
+                                        });
+
+                                    }
+                                    // javaex.render();
+                                    // reload();
+                                },
+                                error: function() {
+                                    javaex.alert({
+                                        content: "有错误发生！"
+                                    });
+
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    javaex.optTip({
+                        content: "加载失败",
+                        type: "error"
+                    });
+                    javaex.alert({
+                        content: res.message
+                    });
+
+                }
+                javaex.render();
+            },
+            error: function() {
+                javaex.optTip({
+                    content: "加载失败",
+                    type: "error"
+                });
+                javaex.alert({
+                    content: "有错误发生！"
+                });
+
+            }
+        });
+    }
+
+
+    //  创建员工详细信息
+    function createpersonInfo(personInfo) {
+
+        if (personInfo.name == null) {
+            personInfo.name = ""
+        }
+
+        if (personInfo.sex == null) {
+            personInfo.sex = ""
+        }
+
+        if (personInfo.age == null) {
+            personInfo.age = ""
+        }
+
+        if (personInfo.phone == null) {
+            personInfo.phone = ""
+        }
+
+        if (personInfo.qq == null) {
+            personInfo.qq = ""
+        }
+        return `<tr>
+                    <td>` + personInfo.inforId + `</td>
+                    <td>` + personInfo.name + `</td>
+                    <td>` + personInfo.sex + `</td>
+                    <td>` + personInfo.age + `</td>
+                    <td>` + personInfo.phone + `</td>
+                    <td>` + personInfo.qq + `</td> 
+                    <td>                    
+                    <button class="button green" onclick="resetpassword(` + personInfo.workId + `)">重置密码    </button>
+                    <button class="button red" onclick="leave(` + personInfo.workId + `)">离职(谨慎操作)</button>
+                    </td>          
+                </tr>`
+
+
+    }
+
+
+
+
+
+
+    //搜索
+    function search() {
+        var sousuo = $("#sousuo").val();
+        javaex.optTip({
+            content: "数据提交中，请稍候...",
+            type: "submit"
+        });
+        $.ajax({
+            url: "http://127.0.0.1:8080/employeeSystem/employee/getpersoninfo",
+            data: {
+                "sousuo": sousuo,
+                "perPageCount": perPageCount,
+                "currentPage": 1
+            },
+            dataType: "json",
+            type: "post",
+            async: false,
+            cache: false,
+            success: function(res) {
+                if (res.message == "success") {
+                    javaex.optTip({
+                        content: "操作成功",
+                        type: "success"
+                    });
+                    sessionStorage.setItem("personinfoList", res.personinfoList)
+                    console.log(1);
+                    console.log(res.personinfoList)
+                    var html = "";
+
+                    var personinfoList = JSON.parse(res.personinfoList);
+                    console.log(personinfoList);
+                    // var personinfoList = JSON.parse(res.personinfoList);
+                    for (var i = 0; i < personinfoList.lengt; i++) {
+                        html = html + createpersonInfo(personinfoList[i]);
+                    }
+                    $("#createpersonInfo").html(html);
+                    pageCount = res.pageCount;
+                    console.log(pageCount);
+                    totalNum = res.totalNum;
+                    console.log(totalNum);
+                    $("#page").empty();
+                    javaex.page({
+                        id: "page",
+                        pageCount: pageCount, // 总页数
+                        currentPage: 1, // 默认选中第几页
+                        perPageCount: perPageCount, // 每页显示多少条，不填时，不显示该条数选择控件
+                        isShowJumpPage: true, // 是否显示跳页
+                        totalNum: totalNum, // 总条数，不填时，不显示
+                        position: "right",
+                        callback: function(rtn) {
+                            console.log("当前选中的页数：" + rtn.pageNum);
+                            console.log("每页显示条数：" + rtn.perPageCount);
+                            $.ajax({
+                                url: "http://127.0.0.1:8080/employeeSystem/employee/getpersoninfo",
+                                data: {
+                                    "name": sousuo,
+                                    "perPageCount": rtn.perPageCount,
+                                    "currentPage": rtn.pageNum
+                                },
+                                dataType: "json",
+                                type: "post",
+                                async: false,
+                                cache: false,
+                                success: function(res) {
+                                    if (res.message == "success") {
+                                        sessionStorage.setItem("personinfoList", res.personinfoList)
+                                        console.log(res.personinfoList)
+                                        var html = "";
+                                        var personinfoList = JSON.parse(res.personinfoList);
+                                        // var directortList = JSON.parse(res.directortList);
+                                        for (var i = 0; i < personinfoList.lengt; i++) {
+                                            html = html + createpersonInfo(personinfoList[i]);
+                                        }
+                                        $("#employeeInfo").html(html);
+                                        pageCount = res.pageCount;
+
+                                        totalNum = res.totalNum;
+                                    } else {
+                                        javaex.alert({
+                                            content: res.message
+                                        });
+
+                                    }
+                                    // javaex.render();
+                                    // reload();
+                                },
+                                error: function() {
+                                    javaex.alert({
+                                        content: "有错误发生！"
+                                    });
+
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    javaex.optTip({
+                        content: "操作失败",
+                        type: "error"
+                    });
+                    javaex.alert({
+                        content: res.message
+                    });
+
+                }
+                javaex.render();
+            },
+            error: function() {
+                javaex.optTip({
+                    content: "操作失败",
+                    type: "error"
+                });
+                javaex.alert({
+                    content: "有错误发生！"
+                });
+
+            }
+        });
+    }
+
+
+
+    //重置密码
+    function resetpassword(workId) {
+        console.log("workId" + workId)
+
+        $.ajax({
+            type: "post",
+            //后端需要调用的地址
+            url: "http://127.0.0.1:8080/employeeSystem/employee/resetpassword",
+            dataType: "json",
+            data: {
+                "workId": workId,
+            },
+            // contentType: "json/application",
+            //设置超时
+            timeout: 10000,
+            async: true,
+            success: function(response) {
+                javaex.optTip({
+                    content: "操作成功",
+                    type: "success"
+
+                });
+                javaex.alert({
+                    content: "密码已经重置为员工工号"
+                });
+
+            },
+            error: function(data) {
+                javaex.optTip({
+                    content: "操作失败",
+                    type: "error"
+                });
+            },
+            //调用执行后调用的函数
+            complete: function(XMLHttpRequest, textStatus) {
+                if (textStatus == 'timeout') {
+                    uploadAjax.abort(); //取消请求
+                    //超时提示：请求超时，请重试
+                    javaex.optTip({
+                        content: "操作失败",
+                        type: "error"
+                    });
+                    javaex.alert({
+                        content: "请求超时，请重试"
+                    });
+                }
+            }
+        });
+    }
+
+    //离职
+    function leave(workId) {
+        console.log("workId2" + workId)
+        $.ajax({
+            type: "post",
+            //后端需要调用的地址
+            url: "http://127.0.0.1:8080/employeeSystem/employee/leaveComp",
+            dataType: "json",
+            data: {
+                "workId": workId,
+            },
+            // contentType: "json/application",
+            //设置超时
+            timeout: 10000,
+            async: true,
+            success: function(response) {
+                if (response.message == "success") {
+                    javaex.optTip({
+                        content: "操作成功",
+                        type: "success"
+                    });
+                    javaex.alert({
+                        content: "该员工已成功离职！"
+                    });
+                } else {
+                    javaex.optTip({
+                        content: "操作失败",
+                        type: "error"
+                    });
+                }
+            },
+            error: function(data) {
+                javaex.optTip({
+                    content: "操作失败",
+                    type: "error"
+                });
+            },
+            //调用执行后调用的函数
+            complete: function(XMLHttpRequest, textStatus) {
+                if (textStatus == 'timeout') {
+                    uploadAjax.abort(); //取消请求
+                    //超时提示：请求超时，请重试
+                    javaex.optTip({
+                        content: "操作失败",
+                        type: "error"
+                    });
+                    javaex.alert({
+                        content: "请求超时，请重试"
+                    });
+                }
+            }
+        });
+    }
+</script>
+
+</html>

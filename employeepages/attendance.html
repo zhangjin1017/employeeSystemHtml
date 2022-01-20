@@ -1,0 +1,503 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <!--字体图标-->
+    <link href="../javaex/pc/css/icomoon.css" rel="stylesheet" />
+    <!--动画-->
+    <link href="../javaex/pc/css/animate.css" rel="stylesheet" />
+    <!--骨架样式-->
+    <link href="../javaex/pc/css/common.css" rel="stylesheet" />
+    <!--皮肤（缇娜）-->
+    <link href="../javaex/pc/css/skin/tina.css" rel="stylesheet" />
+    <!--jquery，不可修改版本-->
+    <script src="../javaex/pc/lib/jquery-1.7.2.min.js"></script>
+    <!--全局动态修改-->
+    <script src="../javaex/pc/js/common.js"></script>
+    <!--核心组件-->
+    <script src="../javaex/pc/js/javaex.min.js"></script>
+    <!--表单验证-->
+    <script src="../javaex/pc/js/javaex-formVerify.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="../css/anniu.css" />
+    <title></title>
+
+</head>
+
+<body>
+
+
+    <!--内容区域-->
+    <div class="list-content">
+        <!--块元素-->
+        <div class="block">
+            <!--banner用来修饰块元素的名称-->
+            <div class="banner">
+                <p class="tab fixed">打卡考勤</p>
+            </div>
+            <!--正文内容-->
+            <div class="main">
+                <!--主体内容-->
+                <div class="list-content" style="margin-left: 150px;">
+
+                    <!--页面有多个表格时，可以用于标识表格-->
+
+                    <!--正文内容-->
+                    <div class="main" id="daka">
+                        <table id="table" class="line table color2" style="width: 500px;margin-left: 180px;margin-top: -50px;">
+                            <tr>
+                                <td>人脸信息：</td>
+                                <td id="faceUrl">
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="inf ">
+                            <button class="bt1" onclick="updateInfo()" style="margin-left: 400px;margin-top: 20px; ">保存</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!--主体内容-->
+    <div class="list-content">
+        <!--块元素-->
+        <div class="block">
+            <!--页面有多个表格时，可以用于标识表格-->
+            <h2>打卡统计</h2>
+            <!--右上角的返回按钮-->
+
+
+
+            <!--正文内容-->
+            <div class="main">
+                <!--表格上方的搜索操作-->
+
+
+                <!--表格上方的操作元素，添加、删除等-->
+
+
+                <table id="table" class="table color2">
+                    <thead>
+                        <tr>
+                            <th>id</th>
+                            <th>工号</th>
+                            <th>姓名</th>
+                            <th>总打卡次数</th>
+                            <th>最近一次打卡时间</th>
+                        </tr>
+                    </thead>
+
+
+                    <tbody id="attendanceInfo">
+                    </tbody>
+                </table>
+                <div class="page">
+                    <ul id="page" class="pagination"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+
+<script>
+    var imgData = "";
+
+
+    function getImgData() {
+        let myImg = document.getElementById("myImage");
+        let context = myImg.getContext('2d');
+        myImg.width = 480;
+        myImg.height = 320;
+        context.drawImage(video, 0, 0, 480, 320);
+        imgData = myImg.toDataURL();
+        // console.log(imgData);
+    }
+
+
+    function getFace() {
+        javaex.confirm({
+            width: `520`,
+            title: "人脸识别",
+            content: `<video id="video" width="480" height="320" controls></video>
+            <canvas style="display:none" id="myImage" width="0" height="0"></canvas>`,
+            callback: "getImgData()",
+            confirmName: "拍摄"
+        });
+
+
+        //访问用户媒体设备的兼容方法
+        function getUserMedia(constraints, success, error) {
+            if (navigator.mediaDevices.getUserMedia) {
+                //最新的标准API
+                navigator.mediaDevices.getUserMedia(constraints).then(success).catch(error);
+            } else if (navigator.webkitGetUserMedia) {
+                //webkit核心浏览器
+                navigator.webkitGetUserMedia(constraints, success, error)
+            } else if (navigator.mozGetUserMedia) {
+                //firfox浏览器
+                navigator.mozGetUserMedia(constraints, success, error);
+            } else if (navigator.getUserMedia) {
+                //旧版API
+                navigator.getUserMedia(constraints, success, error);
+            }
+        }
+
+        let video = document.getElementById('video');
+        video.controls = false;
+
+        function success(stream) {
+            //兼容webkit核心浏览器
+            let CompatibleURL = window.URL || window.webkitURL;
+            //将视频流设置为video元素的源
+            console.log(stream)
+                //video.src = CompatibleURL.createObjectURL(stream);
+            video.srcObject = stream;
+            video.play();
+        }
+
+        function error(error) {
+            console.log(`访问用户媒体设备失败${error.name}, ${error.message}`);
+        }
+        if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
+            //调用用户媒体设备, 访问摄像头
+            getUserMedia({
+                video: {
+                    width: 480,
+                    height: 320
+                }
+            }, success, error);
+        } else {
+            alert('不支持访问用户媒体');
+        }
+    };
+
+    function reload() {
+        window.location.reload(true);
+    }
+
+    var emp = sessionStorage.getItem("employee");
+    console.log("," + JSON.parse(emp).workId)
+    var currenttime;
+    var faceUrl;
+    window.onload = function() {
+
+
+        var  date  =  new  Date();    
+        var  seperator1  =  "-";    
+        var  seperator2  =  ":";    
+        var  month  =  date.getMonth()  +  1;    
+        var  strDate  =  date.getDate();    
+        if  (month  >=  1  &&  month  <=  9)  {        
+            month  =  "0"  +  month;    
+        }    
+        if  (strDate  >=  0  &&  strDate  <=  9)  {        
+            strDate  =  "0"  +  strDate;    
+        }    
+        var  currentdate  =  date.getFullYear()  +  seperator1  +  month  +  seperator1  +  strDate;    
+        currenttime = currentdate .split('-').join("");
+        javaex.optTip({
+            content: "数据获取中，请稍候...",
+            type: "submit"
+        });
+
+
+
+        $.ajax({
+            url: "http://127.0.0.1:8080/employeeSystem/employee/getEmployeeInfo",
+            data: {
+                "workId": JSON.parse(emp).workId,
+            },
+            dataType: "json",
+            type: "post",
+            async: false,
+            cache: true,
+            success: function(res) {
+                if (res.message == "success") {
+                    javaex.optTip({
+                        content: "加载成功",
+                        type: "success"
+                    });
+                    sessionStorage.setItem("empinfor", JSON.stringify(res.empinfor))
+                    console.log(1);
+                    console.log(res.empinfor)
+                    var html = "";
+
+                    var empinfor = res.empinfor;
+                    console.log(empinfor);
+                    // var directortList = JSON.parse(res.directortList);
+                    console.log("empinfor.faceUrl" + empinfor.faceUrl)
+                    console.log(typeof(empinfor.faceUrl) == "undefined")
+                    faceUrl = typeof(empinfor.faceUrl);
+                    if (typeof(empinfor.faceUrl) == "undefined") {
+                        $("#faceUrl").html(`
+                        <div class="form-but">
+                            <button onclick="getFace()" class="bt3" name="face" style="width: 300px;height: 45px;margin-top: 10px;" value="">人脸信息采集 </buttton>
+
+                                </div>
+                        `)
+                    } else {
+                        $("#daka").html(`
+                        <table id="table" class="line table color2" style="width: 500px;margin-left: 180px;margin-top: -50px;">
+                            <tr>
+                                <td id="faceUrl">
+                                    <div class="form-but">
+                                    <button onclick="getFace()" class="bt3" name="face" style="width: 300px;height: 55px;margin-top: 10px;margin-left: 100px;"  >请扫描人脸信息打卡</buttton>
+
+                                </div>
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="info-btn">
+                            <button class="bt1" onclick="daka()" style="margin-left: 400px;margin-top: 20px; ">打卡</button>
+                        </div>
+                        `)
+                    }
+
+                } else {
+                    javaex.optTip({
+                        content: "加载失败",
+                        type: "error"
+                    });
+                    javaex.alert({
+                        content: res.message
+                    });
+
+                }
+                javaex.render();
+            },
+            error: function() {
+                javaex.optTip({
+                    content: "加载失败",
+                    type: "error"
+                });
+                javaex.alert({
+                    content: "有错误发生！"
+                });
+
+            }
+        });
+
+
+        //打卡信息
+        $.ajax({
+            url: "http://127.0.0.1:8080/employeeSystem/attendance/getAttendance",
+            data: {
+                "workId": JSON.parse(emp).workId,
+            },
+            dataType: "json",
+            type: "post",
+            async: false,
+            cache: true,
+            success: function(res) {
+                if (res.message == "success") {
+                    javaex.optTip({
+                        content: "加载成功",
+                        type: "success"
+                    });
+
+                    sessionStorage.setItem("attendance", res.attendance);
+                    console.log(1);
+                    console.log(res.attendance)
+                    var attendance = JSON.parse(res.attendance);
+                    var time = attendance.rewardTimes + "";
+                    console.log(currenttime);
+                    console.log(time);
+                    console.log(typeof(currenttime));
+                    console.log(typeof(time));
+                    console.log("faceUrl" + faceUrl);
+
+                    console.log("currenttime == time" + currenttime == time)
+                    console.log("faceUrl != 'undefined'" + faceUrl != "undefined")
+                    if (currenttime == time && faceUrl != "undefined") {
+                        $("#daka").html(`
+                        <table id="table" class="line table color2" style="width: 500px;margin-left: 180px;margin-top: -50px;">
+                            <tr>
+                                <td id="faceUrl">
+                                    <div class="form-but">
+                                    <button onclick="getFace()" class="bt3" name="face" style="width: 300px;height: 55px;margin-top: 10px;margin-left: 100px;"  >请扫描人脸信息打卡</buttton>
+
+                                </div>
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="info-btn">
+                            <button class="button green" onclick="daka()" style="margin-left: 400px;margin-top: 20px; ">已打卡</button>
+                        </div>
+                        `)
+                    }
+                    var time1 = time.substring(0, 4) + "年" + time.substring(4, 6) + "月" + time.substring(6, 8) + "日";
+
+                    $("#attendanceInfo").html(
+                        `<tr>
+                    <td>` + attendance.attendanceId + `</td>
+                    <td>` + attendance.workId + `</td>
+                    <td>` + JSON.parse(sessionStorage.getItem("employee")).name + `</td>
+                    <td>` + attendance.clockTimes + `</td>
+                    <td>` + time1 + `</td>
+                        
+                </tr>`
+
+                    )
+
+                } else {
+                    javaex.optTip({
+                        content: "加载失败",
+                        type: "error"
+                    });
+                    javaex.alert({
+                        content: res.message
+                    });
+
+                }
+                javaex.render();
+            },
+            error: function() {
+                javaex.optTip({
+                    content: "加载失败",
+                    type: "error"
+                });
+                javaex.alert({
+                    content: "请先录入人脸信息！"
+                });
+
+            }
+        });
+    }
+
+    var empinfor = sessionStorage.getItem("empinfor");
+
+    //添加人脸信息
+    function updateInfo() {
+        console.log("imgData" + imgData)
+        if (imgData != "") {
+            $.ajax({
+                url: "http://127.0.0.1:8080/employeeSystem/employee/updateEmployeeFace",
+                data: {
+                    "inforId": JSON.parse(emp).inforId,
+                    "workId": JSON.parse(emp).workId,
+                    "faceUrl": imgData
+                },
+                dataType: "json",
+                type: "post",
+                async: true,
+                cache: true,
+                success: function(res) {
+                    if (res.message == "success") {
+                        javaex.optTip({
+                            content: "录入成功",
+                            type: "success"
+                        });
+                        location.reload();
+                    } else {
+                        javaex.optTip({
+                            content: "录入失败",
+                            type: "error"
+                        });
+                        javaex.alert({
+                            content: res.message
+                        });
+
+                    }
+                },
+                error: function() {
+                    javaex.optTip({
+                        content: "加载失败",
+                        type: "error"
+                    });
+                    javaex.alert({
+                        content: "有错误发生！"
+                    });
+                }
+            });
+        } else {
+            javaex.optTip({
+                content: "人脸信息还未拍摄，保存失败",
+                type: "error"
+            });
+        }
+
+    }
+
+
+    //验证人脸信息
+    function daka() {
+        var stateId = sessionStorage.getItem("stateId");
+        console.log("stateId" + stateId)
+        if (stateId == 5) {
+            javaex.alert({
+                content: "你现在是停职状态，请联系管理员",
+
+            });
+            return;
+
+        }
+
+        if (stateId == 9) {
+            javaex.alert({
+                content: "你现在是请假状态，请联系管理员",
+
+            });
+            return;
+
+        }
+        console.log("imgData" + imgData)
+        if (imgData != "") {
+            $.ajax({
+                url: "http://127.0.0.1:8080/employeeSystem/employee/dakaByFace",
+                data: {
+                    "currenttime": currenttime,
+                    "inforId": JSON.parse(emp).inforId,
+                    "workId": JSON.parse(emp).workId,
+                    "faceUrl": imgData
+                },
+                dataType: "json",
+                type: "post",
+                async: true,
+                cache: true,
+                success: function(res) {
+                    if (res.message == "success") {
+                        javaex.optTip({
+                            content: "验证成功",
+                            type: "success"
+                        });
+                        javaex.alert({
+                            content: "打卡成功！",
+                            callback: reload()
+                        });
+
+                    } else {
+                        javaex.optTip({
+                            content: "验证失败",
+                            type: "error"
+                        });
+                        javaex.alert({
+                            content: res.message
+                        });
+                    }
+                },
+                error: function() {
+                    javaex.optTip({
+                        content: "加载失败",
+                        type: "error"
+                    });
+                    javaex.alert({
+                        content: "有错误发生！"
+                    });
+                }
+            });
+        } else {
+            javaex.optTip({
+                content: "人脸信息还未拍摄，扫描失败",
+                type: "error"
+            });
+        }
+
+    }
+</script>
+
+</html>

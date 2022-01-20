@@ -1,0 +1,280 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+    <meta charset="utf-8">
+
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!--字体图标-->
+    <link href="../javaex/pc/css/icomoon.css" rel="stylesheet" />
+    <!--动画-->
+    <link href="../javaex/pc/css/animate.css" rel="stylesheet" />
+    <!--骨架样式-->
+    <link href="../javaex/pc/css/common.css" rel="stylesheet" />
+    <!--皮肤（缇娜）-->
+    <link href="../javaex/pc/css/skin/tina.css" rel="stylesheet" />
+    <!--jquery，不可修改版本-->
+    <script src="../javaex/pc/lib/jquery-1.7.2.min.js"></script>
+    <!--全局动态修改-->
+    <script src="../javaex/pc/js/common.js"></script>
+    <!--核心组件-->
+    <script src="../javaex/pc/js/javaex.min.js"></script>
+    <!--表单验证-->
+    <script src="../javaex/pc/js/javaex-formVerify.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/anniu.css" />
+    <title>后台管理系统</title>
+    <style>
+
+    </style>
+</head>
+
+<body>
+    <!--顶部导航-->
+    <div class="admin-navbar">
+        <div class="admin-container-fluid clear" style="background: url(../image/back1.jpg);" <!--logo名称-->
+            <div class="admin-logo" style="color:black">员工事务管理系统-部门经理</div>
+
+            <!--右侧-->
+            <ul class="admin-navbar-nav fr">
+                <li>
+                    <a href="javascript:;" id="username" style="color:black">欢迎您，管理员</a>
+                    <ul class="dropdown-menu" style="right: 10px;">
+                        <li><a data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">修改密码</a></li>
+                        <li><a onclick="exit()">退出当前账号</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <!-- 添加部门模态框 -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="exampleModalLabel">修改密码</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+
+
+
+                        <div class="form-group">
+                            <label for="recipient-name" class="col-form-label">新密码:</label>
+                            <input type="password" class="form-control" id="password1">
+                        </div>
+                        <div class="form-group">
+                            <label for="recipient-name" class="col-form-label">确认密码:</label>
+                            <input type="password" class="form-control" id="password2">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="passwordsub" onclick="passwordsub()">确认修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--主题内容-->
+    <div class="admin-mian">
+        <!--左侧菜单-->
+        <div class="admin-aside admin-aside-fixed" style="background: url(../image/back8.jpg);">
+            <h1><span class="admin-nav-name">总览</span></a>
+            </h1>
+            <div id="admin-toc" class="admin-toc">
+                <div class="menu-box">
+                    <div id="menu" class="menu" style="background: url(../image/back1.jpg);">
+                        <ul>
+                            <li class="menu-item">
+                                <a href="javascript:page('person.html');">个人信息   <i class=""></i></a>
+
+                            </li>
+                            <li class="menu-item">
+                                <a href="javascript:;">我的部门<i class="icon-keyboard_arrow_left"></i></a>
+                                <ul>
+                                    <li><a href="javascript:page('employee.html');">部门员工</a></li>
+
+                                </ul>
+                            </li>
+                            <li class="menu-item">
+                                <a href="javascript:;">部门申请<i class="icon-keyboard_arrow_left"></i></a>
+                                <ul>
+                                    <li><a href="javascript:page('apply1.html');">发送的申请</a></li>
+                                    <li><a href="javascript:page('apply.html');">接受的申请</a></li>
+
+
+                                </ul>
+                            </li>
+
+
+                            <li class="menu-item">
+                                <a href="javascript:;">通知管理<i class="icon-keyboard_arrow_left"></i></a>
+                                <ul>
+                                    <li><a href="javascript:page('notice1.html');">发送的通知</a></li>
+                                    <li><a href="javascript:page('notice.html');">接收的通知</a></li>
+
+                                </ul>
+                            </li>
+
+                            <li class="menu-item">
+                                <a href="javascript:;">反馈管理<i class="icon-keyboard_arrow_left"></i></a>
+                                <ul>
+                                    <li><a href="javascript:page('feedback.html');">我的反馈</a></li>
+                                    <li><a href="javascript:page('feedback1.html');">员工反馈</a></li>
+
+                                </ul>
+                            </li>
+
+                            <li class="menu-item">
+                                <a href="javascript:;">文件管理<i class="icon-keyboard_arrow_left"></i></a>
+                                <ul>
+                                    <li><a href="javascript:page('file.html');">发送的文件</a></li>
+                                    <li><a href="javascript:page('file1.html');">接收的文件</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--iframe载入内容-->
+        <div class="admin-markdown">
+            <iframe id="page" src="person.html"></iframe>
+        </div>
+    </div>
+</body>
+<script>
+    function exit() {
+        sessionStorage.clear();
+        toLogin();
+    }
+
+    function toLogin() {
+        window.location.href = "../login.html";
+    }
+    var business;
+    window.onload = function() {
+        employee = JSON.parse(sessionStorage.getItem("employee"));
+        if (employee == null) {
+            javaex.alert({
+                content: "请先登录",
+                callback: "toLogin()"
+            })
+        }
+        $("#username").html("欢迎您，" + employee.name);
+    }
+
+    var hightUrl = "xxxx";
+    javaex.menu({
+        id: "menu",
+        isAutoSelected: true,
+        key: "",
+        url: hightUrl
+    });
+
+    $(function() {
+        // 设置左侧菜单高度
+        setMenuHeight();
+    });
+
+    /**
+     * 设置左侧菜单高度
+     */
+    function setMenuHeight() {
+        var height = document.documentElement.clientHeight - $("#admin-toc").offset().top;
+        height = height - 10;
+        $("#admin-toc").css("height", height + "px");
+    }
+
+    // 控制页面载入
+    function page(url) {
+        $("#page").attr("src", url);
+    }
+
+
+    //修改密码
+    function passwordsub() {
+        var password1 = $("#password1").val();
+        var password2 = $("#password2").val();
+
+
+
+
+        if (password1 == "") {
+            javaex.alert({
+                content: "新密码不能为空，请输入新密码！",
+            });
+            return;
+        }
+
+        if (password2 != password1) {
+            javaex.alert({
+                content: "两次密码不容，请再次确认密码！",
+            });
+            return;
+        }
+        javaex.optTip({
+            content: "数据提交中，请稍候...",
+            type: "submit"
+        });
+        $.ajax({
+            type: "post",
+            //后端需要调用的地址
+            url: "http://127.0.0.1:8080/employeeSystem/employee/updateEmpPassword",
+            dataType: "json",
+            data: {
+                "empId": employee.empId,
+                "workId": employee.workId,
+                "password1": password1,
+
+            },
+            // contentType: "json/application",
+            //设置超时
+            timeout: 10000,
+            async: true,
+            success: function(response) {
+                javaex.optTip({
+                    content: "提交成功",
+                    type: "success"
+                });
+                console.log(response);
+                if (response.message == "success") {
+                    location.reload();
+                } else {
+                    javaex.alert({
+                        content: response.message,
+                    });
+                }
+
+            },
+            error: function(data) {
+                javaex.optTip({
+                    content: "操作失败",
+                    type: "error"
+                });
+            },
+            //调用执行后调用的函数
+            complete: function(XMLHttpRequest, textStatus) {
+                if (textStatus == 'timeout') {
+                    uploadAjax.abort(); //取消请求
+                    //超时提示：请求超时，请重试
+                    javaex.optTip({
+                        content: "操作失败",
+                        type: "error"
+                    });
+                    javaex.alert({
+                        content: "请求超时，请重试"
+                    });
+                }
+            }
+        });
+    }
+</script>
+
+
+
+</html>
